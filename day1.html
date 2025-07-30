@@ -1,107 +1,45 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Day { '{ day }' } – { '{ date }' }</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 960px;
-      margin: auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #333;
-    }
-    header {
-      background-color: #2a5d84;
-      color: white;
-      padding: 40px 20px;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0 0 10px;
-      font-size: 2.5em;
-    }
-    header p {
-      margin: 0;
-      font-size: 1.2em;
-    }
-    nav {
-      background-color: #fff;
-      padding: 10px 20px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-    nav a {
-      text-decoration: none;
-      color: #2a5d84;
-      font-weight: bold;
-    }
-    .stats {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Day {{ day }} – {{ date }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <script>
+      fetch("header.html")
+        .then((response) => response.text())
+        .then((data) => {
+          {
+            document.getElementById("site-header").innerHTML = data;
+          }
+        });
+    </script>
 
-  <header>
-    <h1>Superior Hiking Trail</h1>
-    <p>15 Days – 310 Miles – Through the Northwoods of Minnesota</p>
-  </header>
+    <main>
+      <h2>Day {{ day }} – {{ date }}</h2>
+      <div class="stats">
+        <p>
+          <strong>Total Distance:</strong> {{ distance }} miles<br />
+          <strong>Elapsed Time:</strong> {{ elapsed_time }}<br />
+          <strong>Start:</strong> {{ start }} at {{ start_time }}<br />
+          <strong>End:</strong> {{ end }} at {{ stop_time }}<br />
+          <strong>Trail Miles:</strong> {{ trail_miles }}<br />
+          <strong>Non-Trail Miles:</strong> {{ non_trail_miles }}<br />
+          <strong>Ascent:</strong> {{ ascent }} ft<br />
+          <strong>Descent:</strong> {{ descent }} ft<br />
+          <strong>Elevation Range:</strong> {{ elv_min }} - {{ elv_max }} ft
+        </p>
+      </div>
 
-  <nav>
-    <a href="day1.html">Day 1</a>
-    <a href="day2.html">Day 2</a>
-    <a href="day3.html">Day 3</a>
-    <a href="day4.html">Day 4</a>
-    <a href="day5.html">Day 5</a>
-    <a href="day6.html">Day 6</a>
-    <a href="day7.html">Day 7</a>
-    <a href="day8.html">Day 8</a>
-    <a href="day9.html">Day 9</a>
-    <a href="day10.html">Day 10</a>
-    <a href="day11.html">Day 11</a>
-    <a href="day12.html">Day 12</a>
-    <a href="day13.html">Day 13</a>
-    <a href="day14.html">Day 14</a>
-    <a href="day15.html">Day 15</a>
-  </nav>
+      <section>
+        <h3>Journal</h3>
+        <p>[Your notes for Day {{ day }} go here.]</p>
+      </section>
+    </main>
 
-
-  <main>
-    <h2>Day { '{ day }' } – { '{ date }' }</h2>
-    <div class="stats">
-      <p><strong>Start:</strong> { '{ start }' }<br>
-      <strong>End:</strong> { '{ end }' }<br>
-      <strong>Start Time:</strong> { '{ start_time }' }<br>
-      <strong>Stop Time:</strong> { '{ stop_time }' }<br>
-      <strong>Trail Miles:</strong> { '{ trail_miles }' }<br>
-      <strong>Non-Trail Miles:</strong> { '{ non_trail_miles }' }<br>
-      <strong>Ascent:</strong> { '{ ascent }' } ft<br>
-      <strong>Descent:</strong> { '{ descent }' } ft<br>
-      <strong>Elevation Range:</strong> { '{ elv_min }' } - { '{ elv_max }' } ft<br>
-      <strong>Total Distance:</strong> { '{ distance }' } miles<br>
-      <strong>Elapsed Time:</strong> { '{ elapsed_time }' }</p>
-    </div>
-
-    <section>
-      <h3>Journal</h3>
-      <p>[Your notes for Day { '{ day }' } go here.]</p>
-    </section>
-  </main>
-
-  <footer>
-    &copy; 2025 Superior Hiking Trail Journal
-  </footer>
-</body>
+    <footer>&copy; 2025 Superior Hiking Trail Journal</footer>
+  </body>
 </html>

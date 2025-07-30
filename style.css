@@ -92,3 +92,20 @@ footer {
   color: #777;
   font-size: 0.9em;
 }
+
+.dark-mode {
+  background-color: #1c1c1c;
+  color: #eee;
+}
+.dark-mode header,
+.dark-mode nav {
+  background-color: #111;
+  color: #eee;
+}
+.dark-mode a {
+  color: #81c784;
+}
+.dark-mode table {
+  background-color: #333;
+  color: #eee;
+}

@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Superior Hiking Trail – 15 Day Journey</title>
     <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style></style>
   </head>
   <body>
     <div id="site-header"></div>
@@ -293,5 +298,64 @@
     </main>
 
     <footer>&copy; 2025 Superior Hiking Trail Journal</footer>
+    <script>
+      // Dark mode toggle
+      const toggleButton = document.createElement("button");
+      toggleButton.textContent = "🌙 Dark Mode";
+      toggleButton.style.position = "fixed";
+      toggleButton.style.bottom = "10px";
+      toggleButton.style.right = "10px";
+      toggleButton.style.padding = "8px 12px";
+      toggleButton.style.border = "none";
+      toggleButton.style.borderRadius = "5px";
+      toggleButton.style.background = "#2a5d84";
+      toggleButton.style.color = "white";
+      toggleButton.style.cursor = "pointer";
+      document.body.appendChild(toggleButton);
+
+      toggleButton.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+      });
+    </script>
+
+    <script>
+      // Collapsible journal sections (if used)
+      document.querySelectorAll("section h3").forEach((h) => {
+        h.style.cursor = "pointer";
+        const section = h.nextElementSibling;
+        if (section) section.style.display = "none";
+        h.addEventListener("click", () => {
+          if (section)
+            section.style.display =
+              section.style.display === "none" ? "block" : "none";
+        });
+      });
+    </script>
+
+    <script
+      async
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script>
+      // Example Leaflet map embed (customize later)
+      document.addEventListener("DOMContentLoaded", function () {
+        const mapDiv = document.createElement("div");
+        mapDiv.id = "trail-map";
+        mapDiv.style.height = "300px";
+        mapDiv.style.margin = "2rem 0";
+        document.querySelector("main").prepend(mapDiv);
+
+        const map = L.map("trail-map").setView([47.45, -90.8], 8);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+
+        // You could add trail segments or campsite markers here later
+      });
+    </script>
   </body>
 </html>

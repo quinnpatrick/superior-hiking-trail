@@ -28,14 +28,12 @@
       <section>
         <h2>Welcome to the Journey</h2>
         <p>
-          This website documents a 15-day solo hike along the Superior Hiking
-          Trail from the Northern Terminus near the Canadian border to the
-          southern trailhead. Each day includes journal notes, photos, and
-          highlights of the trail.
+          This website documents a 15-day hike along the Superior Hiking Trail
+          from the Northern Terminus near the Canadian border to the southern
+          trailhead. Each day includes journal notes, photos, and highlights of
+          the trail.
         </p>
       </section>
-
-      <div id="trail-map" style="height: 400px; margin: 2rem 0"></div>
 
       <section class="gallery">
         <img src="images/IMG_20200919_083136.jpg" alt="Northern Terminus" />
@@ -46,6 +44,8 @@
           alt="Highest elevation marker"
         />
       </section>
+
+      <div id="trail-map" style="height: 400px; margin: 2rem 0"></div>
 
       <section>
         <h2>Daily Hike Summary</h2>
@@ -315,7 +315,7 @@
           return;
         }
 
-        const map = L.map("trail-map").setView([47.30341, -91.1341], 11);
+        const map = L.map("trail-map").setView([47.30341, -91.1341], 9);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);

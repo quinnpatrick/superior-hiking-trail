@@ -42,15 +42,21 @@
 
       <section class="gallery">
         <figure>
-          <img src="images/IMG_20200926_151402.jpg" alt="Trail view" />
+          <img src="images/IMG_20200926_101031.jpg" alt="Morning scene" />
           <figcaption>
             <a
-              href="https://maps.google.com/?q=47.31406,-91.28732"
+              href="https://maps.google.com/?q=47.37300,-91.18756"
               target="_blank"
-              >📍 47.31406, -91.28732</a
+              >📍 47.37300, -91.18756</a
             >
           </figcaption>
         </figure>
+
+        <figure>
+          <img src="images/IMG_20200926_104402.jpg" />
+          <figcaption></figcaption>
+        </figure>
+
         <figure>
           <img src="images/IMG_20200926_113148.jpg" alt="Forest path" />
           <figcaption>
@@ -61,6 +67,7 @@
             >
           </figcaption>
         </figure>
+
         <figure>
           <img src="images/IMG_20200926_113908.jpg" />
           <figcaption></figcaption>
@@ -72,9 +79,16 @@
         </figure>
 
         <figure>
-          <img src="images/IMG_20200926_104402.jpg" />
-          <figcaption></figcaption>
+          <img src="images/IMG_20200926_151402.jpg" alt="Trail view" />
+          <figcaption>
+            <a
+              href="https://maps.google.com/?q=47.31406,-91.28732"
+              target="_blank"
+              >📍 47.31406, -91.28732</a
+            >
+          </figcaption>
         </figure>
+
         <figure>
           <img src="images/IMG_20200926_153503.jpg" alt="Trail rocks" />
           <figcaption>
@@ -82,17 +96,6 @@
               href="https://maps.google.com/?q=47.31063,-91.29349"
               target="_blank"
               >📍 47.31063, -91.29349</a
-            >
-          </figcaption>
-        </figure>
-
-        <figure>
-          <img src="images/IMG_20200926_101031.jpg" alt="Morning scene" />
-          <figcaption>
-            <a
-              href="https://maps.google.com/?q=47.37300,-91.18756"
-              target="_blank"
-              >📍 47.37300, -91.18756</a
             >
           </figcaption>
         </figure>
@@ -142,6 +145,13 @@
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
 
+        const campsiteIcon = L.icon({
+          iconUrl: "icons/campsite.png", // Adjust the path as needed
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -10],
+        });
+
         fetch("2020SHTtrip.gpx")
           .then((res) => res.text())
           .then((gpxText) => {
@@ -179,7 +189,7 @@
                 const lon = feature.geometry.coordinates[0];
                 const name = feature.properties.name;
 
-                L.marker([lat, lon])
+                L.marker([lat, lon], { icon: campsiteIcon })
                   .addTo(map)
                   .bindPopup("🏕 " + name);
               });

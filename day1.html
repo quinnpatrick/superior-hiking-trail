@@ -2,9 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Day {{ day }} – {{ date }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Day 1 – Superior Hiking Trail</title>
     <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
   </head>
   <body>
     <div id="site-header"></div>
@@ -12,34 +16,173 @@
       fetch("header.html")
         .then((response) => response.text())
         .then((data) => {
-          {
-            document.getElementById("site-header").innerHTML = data;
-          }
+          document.getElementById("site-header").innerHTML = data;
         });
     </script>
 
     <main>
-      <h2>Day {{ day }} – {{ date }}</h2>
-      <div class="stats">
-        <p>
-          <strong>Total Distance:</strong> {{ distance }} miles<br />
-          <strong>Elapsed Time:</strong> {{ elapsed_time }}<br />
-          <strong>Start:</strong> {{ start }} at {{ start_time }}<br />
-          <strong>End:</strong> {{ end }} at {{ stop_time }}<br />
-          <strong>Trail Miles:</strong> {{ trail_miles }}<br />
-          <strong>Non-Trail Miles:</strong> {{ non_trail_miles }}<br />
-          <strong>Ascent:</strong> {{ ascent }} ft<br />
-          <strong>Descent:</strong> {{ descent }} ft<br />
-          <strong>Elevation Range:</strong> {{ elv_min }} - {{ elv_max }} ft
-        </p>
+      <h1>Day 1 – September 19, 2020</h1>
+      <div class="day-layout">
+        <section class="day-info">
+          <ul>
+            <li><strong>Distance:</strong> 21.9 miles</li>
+            <li><strong>Elapsed Time:</strong> 10:52:47</li>
+            <li><strong>Elevation Min/Max:</strong> 1,100 / 1,885 ft</li>
+            <li><strong>Ascent/Descent:</strong> 6,623 / 6,653 ft</li>
+            <li><strong>Start/Stop:</strong> 6:52:36 AM – 5:45:23 PM</li>
+            <li>
+              <strong>Trail Miles:</strong> 20.6 |
+              <strong>Non-Trail Miles:</strong> 1.3
+            </li>
+            <li>
+              <strong>Start:</strong> Northern Terminus |
+              <strong>End:</strong> Hazel Campsite
+            </li>
+            <li>
+              <strong>Highlights:</strong>
+              <ul>
+                <li>First steps on the trail from the Canadian border.</li>
+                <li>Spotted wildlife early in the morning.</li>
+                <li>Clear skies and crisp fall air all day.</li>
+                <li>
+                  Camped near the scenic Hazel campsite with a stream nearby.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <section class="day-map">
+          <div id="trail-map" style="height: 400px; width: 100%"></div>
+        </section>
       </div>
 
-      <section>
-        <h3>Journal</h3>
-        <p>[Your notes for Day {{ day }} go here.]</p>
+      <section class="gallery">
+        <figure>
+          <img src="images/IMG_0247.JPG" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_0260.JPG" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_0277.JPG" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_0290.JPG" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_0294.JPG" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_20200919_083136.jpg" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_20200919_083225.jpg" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_20200919_110816.jpg" alt="Day 1 photo" />
+          <figcaption>
+            <a href="https://maps.google.com/?q=0,0" target="_blank"
+              >📍 Placeholder location</a
+            >
+          </figcaption>
+        </figure>
       </section>
     </main>
 
-    <footer>&copy; 2025 Superior Hiking Trail Journal</footer>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        const map = L.map("trail-map").setView([47.998, -89.933], 11);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+
+        fetch("2020SHTtrip.gpx")
+          .then((res) => res.text())
+          .then((gpxText) => {
+            const parser = new DOMParser();
+            const gpx = parser.parseFromString(gpxText, "application/xml");
+            const geojson = toGeoJSON.gpx(gpx);
+
+            // 🎯 1. Show only the track named "2020-09-26 06:38:52 Day"
+            const tracks = geojson.features.filter(
+              (f) =>
+                f.geometry.type === "LineString" &&
+                f.properties.name === "2020-09-19 06:52:36 Day"
+            );
+
+            tracks.forEach((feature) => {
+              const coords = feature.geometry.coordinates.map((c) => [
+                c[1],
+                c[0],
+              ]);
+              L.polyline(coords, { color: "blue", weight: 4 }).addTo(map);
+              map.fitBounds(L.polyline(coords).getBounds());
+            });
+
+            // 🏕 2. Add matching waypoints with names
+            geojson.features
+              .filter(
+                (f) =>
+                  f.geometry.type === "Point" &&
+                  ["Hazel", "Northern Terminus"].includes(f.properties.name)
+              )
+              .forEach((feature) => {
+                const lat = feature.geometry.coordinates[1];
+                const lon = feature.geometry.coordinates[0];
+                const name = feature.properties.name;
+
+                L.marker([lat, lon], { icon: campsiteIcon })
+                  .addTo(map)
+                  .bindPopup("🏕 " + name);
+              });
+          })
+          .catch((err) => console.error("GPX load error:", err));
+      });
+    </script>
   </body>
 </html>

@@ -1,27 +1,91 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans&display=swap');
+
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Open Sans', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f0f4f8;
-  color: #333;
+  background-color: #f5f7f4;
+  color: #2b2b2b;
+  background-image: url('https://www.transparenttextures.com/patterns/cartographer.png');
 }
+
+h1, h2, h3 {
+  font-family: 'Merriweather', serif;
+  color: #2a5d84;
+}
+
+header {
+  background-color: #2a5d84;
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 10px;
+  font-size: 2.5em;
+}
+
+header p {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+nav {
+  background-color: #ffffff;
+  padding: 10px 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #2a5d84;
+  font-weight: bold;
+}
+
 main {
   padding: 20px;
   max-width: 960px;
   margin: auto;
 }
+
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 15px;
   margin-top: 30px;
 }
+
 .gallery img {
   width: 100%;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  background: #ffffffcc;
+}
+
+th, td {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+thead {
+  background-color: #2a5d84;
+  color: white;
+}
+
 footer {
   text-align: center;
   padding: 20px;

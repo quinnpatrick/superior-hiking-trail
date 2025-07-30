@@ -338,7 +338,6 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <script>
-      // Example Leaflet map embed (customize later)
       document.addEventListener("DOMContentLoaded", function () {
         const mapDiv = document.createElement("div");
         mapDiv.id = "trail-map";
@@ -346,12 +345,40 @@
         mapDiv.style.margin = "2rem 0";
         document.querySelector("main").prepend(mapDiv);
 
-        const map = L.map("trail-map").setView([47.45, -90.8], 8);
+        const map = L.map("trail-map").setView([47.30341, -91.1341], 9);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
 
-        // You could add trail segments or campsite markers here later
+        const trailCoords = [
+          [47.98653479665518, -89.93333109654486],
+          [47.98654451966286, -89.93332824669778],
+          [47.98655994236469, -89.9332896899432],
+          [47.98656220547855, -89.9332740996033],
+          [47.98658173531294, -89.9332804698497],
+          [47.986573772504926, -89.93327418342233],
+          [47.98658165149391, -89.9332413263619],
+          [47.986590787768364, -89.93325582705438],
+          [47.98658617772162, -89.93325767107308],
+          [47.98658626154065, -89.93326932191849],
+          [47.98659975640476, -89.93326873518527],
+        ];
+
+        const trailLine = L.polyline(trailCoords, {
+          color: "green",
+          weight: 4,
+        }).addTo(map);
+
+        // Add start marker
+        const startMarker = L.marker(trailCoords[0]).addTo(map);
+        startMarker.bindPopup("Start: Northern Terminus").openPopup();
+
+        // Add end marker
+        const endMarker = L.marker(trailCoords[trailCoords.length - 1]).addTo(
+          map
+        );
+        endMarker.bindPopup("End: Southern Terminus");
+        map.fitBounds(trailLine.getBounds());
       });
     </script>
   </body>

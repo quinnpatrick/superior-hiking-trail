@@ -52,14 +52,28 @@
           </figcaption>
         </figure>
         <figure>
-          <img src="images/IMG_20200926_101031.jpg" alt="Morning scene" />
+          <img src="images/IMG_20200926_113148.jpg" alt="Forest path" />
           <figcaption>
             <a
-              href="https://maps.google.com/?q=47.37300,-91.18756"
+              href="https://maps.google.com/?q=47.35103,-91.20938"
               target="_blank"
-              >📍 47.37300, -91.18756</a
+              >📍 47.35103, -91.20938</a
             >
           </figcaption>
+        </figure>
+        <figure>
+          <img src="images/IMG_20200926_113908.jpg" />
+          <figcaption></figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_20200926_124412.jpg" />
+          <figcaption></figcaption>
+        </figure>
+
+        <figure>
+          <img src="images/IMG_20200926_104402.jpg" />
+          <figcaption></figcaption>
         </figure>
         <figure>
           <img src="images/IMG_20200926_153503.jpg" alt="Trail rocks" />
@@ -71,13 +85,14 @@
             >
           </figcaption>
         </figure>
+
         <figure>
-          <img src="images/IMG_20200926_113148.jpg" alt="Forest path" />
+          <img src="images/IMG_20200926_101031.jpg" alt="Morning scene" />
           <figcaption>
             <a
-              href="https://maps.google.com/?q=47.35103,-91.20938"
+              href="https://maps.google.com/?q=47.37300,-91.18756"
               target="_blank"
-              >📍 47.35103, -91.20938</a
+              >📍 47.37300, -91.18756</a
             >
           </figcaption>
         </figure>
@@ -93,7 +108,7 @@
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
 
-        fetch("2020SHTtrip.gpx")
+        fetch("day8.gpx")
           .then((res) => res.text())
           .then((gpxText) => {
             const parser = new DOMParser();

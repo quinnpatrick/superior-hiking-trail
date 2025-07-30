@@ -9,7 +9,11 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <style></style>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
   </head>
   <body>
     <div id="site-header"></div>
@@ -333,52 +337,44 @@
     </script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const mapDiv = document.createElement("div");
-        mapDiv.id = "trail-map";
-        mapDiv.style.height = "300px";
-        mapDiv.style.margin = "2rem 0";
-        document.querySelector("main").prepend(mapDiv);
-
         const map = L.map("trail-map").setView([47.30341, -91.1341], 9);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
 
-        const trailCoords = [
-          [47.98653479665518, -89.93333109654486],
-          [47.98654451966286, -89.93332824669778],
-          [47.98655994236469, -89.9332896899432],
-          [47.98656220547855, -89.9332740996033],
-          [47.98658173531294, -89.9332804698497],
-          [47.986573772504926, -89.93327418342233],
-          [47.98658165149391, -89.9332413263619],
-          [47.986590787768364, -89.93325582705438],
-          [47.98658617772162, -89.93325767107308],
-          [47.98658626154065, -89.93326932191849],
-          [47.98659975640476, -89.93326873518527],
-        ];
+        fetch("2020SHTtrip.gpx")
+          .then((res) => res.text())
+          .then((gpxText) => {
+            const parser = new DOMParser();
+            const gpx = parser.parseFromString(gpxText, "application/xml");
+            const geojson = toGeoJSON.gpx(gpx);
 
-        const trailLine = L.polyline(trailCoords, {
-          color: "green",
-          weight: 4,
-        }).addTo(map);
+            const allCoords = [];
 
-        // Add start marker
-        const startMarker = L.marker(trailCoords[0]).addTo(map);
-        startMarker.bindPopup("Start: Northern Terminus").openPopup();
+            geojson.features.forEach((feature) => {
+              const coords = feature.geometry.coordinates.map((coord) => [
+                coord[1],
+                coord[0],
+              ]);
+              allCoords.push(coords);
+              L.polyline(coords, { color: "green", weight: 3 }).addTo(map);
+            });
 
-        // Add end marker
-        const endMarker = L.marker(trailCoords[trailCoords.length - 1]).addTo(
-          map
-        );
-        endMarker.bindPopup("End: Southern Terminus");
-        map.fitBounds(trailLine.getBounds());
+            // Add Start marker at known coordinate
+            const startMarker = L.marker([47.9989833, -89.9335]).addTo(map);
+            startMarker.bindPopup("Start: Northern Terminus").openPopup();
+
+            // Add End marker at known coordinate
+            const endMarker = L.marker([46.6076833, -92.2917833]).addTo(map);
+            endMarker.bindPopup("End: Southern Terminus");
+
+            // Zoom to bounds
+            const allLatLngs = allCoords.flat();
+            map.fitBounds(L.polyline(allLatLngs).getBounds());
+          });
       });
     </script>
   </body>

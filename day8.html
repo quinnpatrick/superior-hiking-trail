@@ -98,7 +98,7 @@
         </figure>
       </section>
     </main>
-
+    <!-- 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
     <script>
@@ -129,6 +129,62 @@
             L.polyline(coords, { color: "blue", weight: 3 }).addTo(map);
             map.fitBounds(L.polyline(coords).getBounds());
           });
+      });
+    </script> -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        const map = L.map("trail-map").setView([47.35, -91.22], 11);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+
+        fetch("2020SHTtrip.gpx")
+          .then((res) => res.text())
+          .then((gpxText) => {
+            const parser = new DOMParser();
+            const gpx = parser.parseFromString(gpxText, "application/xml");
+            const geojson = toGeoJSON.gpx(gpx);
+
+            // 🎯 1. Show only the track named "2020-09-26 06:38:52 Day"
+            const tracks = geojson.features.filter(
+              (f) =>
+                f.geometry.type === "LineString" &&
+                f.properties.name === "2020-09-26 06:38:52 Day"
+            );
+
+            tracks.forEach((feature) => {
+              const coords = feature.geometry.coordinates.map((c) => [
+                c[1],
+                c[0],
+              ]);
+              L.polyline(coords, { color: "blue", weight: 4 }).addTo(map);
+              map.fitBounds(L.polyline(coords).getBounds());
+            });
+
+            // 🏕 2. Add matching waypoints with names
+            geojson.features
+              .filter(
+                (f) =>
+                  f.geometry.type === "Point" &&
+                  ["Section 13", "South Beaver River"].includes(
+                    f.properties.name
+                  )
+              )
+              .forEach((feature) => {
+                const lat = feature.geometry.coordinates[1];
+                const lon = feature.geometry.coordinates[0];
+                const name = feature.properties.name;
+
+                L.marker([lat, lon])
+                  .addTo(map)
+                  .bindPopup("🏕 " + name);
+              });
+          })
+          .catch((err) => console.error("GPX load error:", err));
       });
     </script>
   </body>

@@ -35,7 +35,7 @@
         </p>
       </section>
 
-      <div id="trail-map" style="height: 300px; margin: 2rem 0"></div>
+      <div id="trail-map" style="height: 400px; margin: 2rem 0"></div>
 
       <section class="gallery">
         <img src="images/IMG_20200919_083136.jpg" alt="Northern Terminus" />
@@ -315,7 +315,7 @@
           return;
         }
 
-        const map = L.map("trail-map").setView([47.30341, -91.1341], 9);
+        const map = L.map("trail-map").setView([47.30341, -91.1341], 11);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);

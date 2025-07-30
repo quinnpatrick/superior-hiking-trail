@@ -8,7 +8,7 @@
     <bounds maxlat="47.999188788235188" maxlon="-89.897231832146645" minlat="46.607631174847484" minlon="-92.370967073366046" />
   </metadata>
 
-  <wpt lat="47.424132060259581" lon="-91.152425184845924">
+  <!-- <wpt lat="47.424132060259581" lon="-91.152425184845924">
     <time>2020-06-11T01:27:14Z</time>
     <name>Section 13</name>
     <sym>Campground</sym>
@@ -42,7 +42,7 @@
         <ctx:CreationTime>2020-06-11T01:27:14Z</ctx:CreationTime>
       </ctx:CreationTimeExtension>
     </extensions>
-  </wpt>
+  </wpt> -->
 
   <trk>
     <name>2020-09-26 06:38:52 Day</name>

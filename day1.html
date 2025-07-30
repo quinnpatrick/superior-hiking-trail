@@ -140,6 +140,12 @@
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap contributors",
         }).addTo(map);
+        const campsiteIcon = L.icon({
+          iconUrl: "icons/campsite.png", // Adjust the path as needed
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -10],
+        });
 
         fetch("2020SHTtrip.gpx")
           .then((res) => res.text())
@@ -164,21 +170,29 @@
               map.fitBounds(L.polyline(coords).getBounds());
             });
 
-            // 🏕 2. Add matching waypoints with names
+            // 🏕 2. Add all waypoints with appropriate icons
             geojson.features
-              .filter(
-                (f) =>
-                  f.geometry.type === "Point" &&
-                  ["Hazel", "Northern Terminus"].includes(f.properties.name)
-              )
+              .filter((f) => f.geometry.type === "Point")
               .forEach((feature) => {
                 const lat = feature.geometry.coordinates[1];
                 const lon = feature.geometry.coordinates[0];
-                const name = feature.properties.name;
+                const name = feature.properties.name || "Unnamed";
+                const sym = feature.properties.sym || "";
 
-                L.marker([lat, lon], { icon: campsiteIcon })
+                const icon =
+                  sym === "Campground"
+                    ? campsiteIcon
+                    : L.icon({
+                        iconUrl:
+                          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                      });
+
+                L.marker([lat, lon], { icon })
                   .addTo(map)
-                  .bindPopup("🏕 " + name);
+                  .bindPopup(`${sym === "Campground" ? "🏕 " : "📍 "}${name}`);
               });
           })
           .catch((err) => console.error("GPX load error:", err));

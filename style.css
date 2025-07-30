@@ -90,6 +90,38 @@ thead {
   color: white;
 }
 
+
+.day-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.day-info,
+.day-map {
+  flex: 1 1 48%;
+}
+
+.day-info ul ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  font-size: 0.95em;
+}
+
+@media (max-width: 768px) {
+  .day-layout {
+    flex-direction: column;
+  }
+
+  .day-info,
+  .day-map {
+    flex: 1 1 100%;
+  }
+}
+
+
+
 footer {
   text-align: center;
   padding: 20px;

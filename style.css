@@ -28,6 +28,11 @@ header h1 {
   color: #ffffff;
 }
 
+header h1 a {
+  text-decoration: none;
+  color: inherit;
+}
+
 header p {
   margin: 0;
   font-size: 1.2em;

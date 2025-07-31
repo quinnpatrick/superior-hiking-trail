@@ -94,7 +94,12 @@ thead {
   background-color: #2a5d84;
   color: white;
 }
-
+tr.subtotal {
+  background-color: #e9ecef;
+  font-weight: bold;
+  border-top: 2px solid #adb5bd;
+  border-bottom: 2px solid #adb5bd;
+}
 
 .day-layout {
   display: flex;

@@ -9,6 +9,10 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="site-header"></div>
@@ -19,6 +23,7 @@
           document.getElementById("site-header").innerHTML = data;
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
 
     <main>
       <h1>Day 9 – September 27, 2020</h1>
@@ -39,6 +44,23 @@
               <strong>Start:</strong> South Beaver River Campsite |
               <strong>End:</strong> Gooseberry Parking Lot
             </li>
+            <li>
+              <strong>Highlights:</strong>
+              <ul>
+                <li>
+                  Stayed the night at the AmericInn in Two Harbors. Loading up
+                  calories from Culver's.
+                </li>
+
+                <li>
+                  Resupplied from our boxes in Paul's truck at the Gooseberry
+                  Parking Lot, along with stopping at Super One in Two Harbors.
+                  It was a good idea to hit this as the ending point, giving us
+                  time to resupply at night and dry out some of our damp gear
+                  from last night.
+                </li>
+              </ul>
+            </li>
           </ul>
         </section>
 
@@ -48,120 +70,60 @@
       </div>
 
       <section class="gallery">
-        <section class="gallery">
-          <figure>
-            <img src="images/IMG_20200927_070137.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 07:01:37<br />
-              <a
-                href="https://maps.google.com/?q=47.26743,-91.29959"
-                target="_blank"
-                >📍 47.26743, -91.29959</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_071537.jpg" />
-            <figcaption>Taken: 2020-09-27 07:15:37</figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_082155.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 08:21:56<br />
-              <a
-                href="https://maps.google.com/?q=47.2589,-91.33564"
-                target="_blank"
-                >📍 47.2589, -91.33564</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_092435.jpg" />
-            <figcaption>Taken: 2020-09-27 09:24:36</figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_095407.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 09:54:07<br />
-              <a
-                href="https://maps.google.com/?q=47.24268,-91.35437"
-                target="_blank"
-                >📍 47.24268, -91.35437</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_102059.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 10:20:59<br />
-              <a
-                href="https://maps.google.com/?q=47.23668,-91.36499"
-                target="_blank"
-                >📍 47.23668, -91.36499</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_113749.jpg" />
-            <figcaption>Taken: 2020-09-27 11:37:50</figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_124434.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 12:44:35<br />
-              <a
-                href="https://maps.google.com/?q=47.18921,-91.40478"
-                target="_blank"
-                >📍 47.18921, -91.40478</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_125439.jpg" />
-            <figcaption>Taken: 2020-09-27 12:54:39</figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_130949.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 13:09:49<br />
-              <a
-                href="https://maps.google.com/?q=47.19752,-91.42036"
-                target="_blank"
-                >📍 47.19752, -91.42036</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_132554.jpg" />
-            <figcaption>Taken: 2020-09-27 13:25:54</figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_134721.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 13:47:22<br />
-              <a
-                href="https://maps.google.com/?q=47.19935,-91.42107"
-                target="_blank"
-                >📍 47.19935, -91.42107</a
-              >
-            </figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_160152.jpg" />
-            <figcaption>Taken: 2020-09-27 16:01:52</figcaption>
-          </figure>
-          <figure>
-            <img src="images/IMG_20200927_164759.jpg" />
-            <figcaption>
-              Taken: 2020-09-27 16:48:00<br />
-              <a
-                href="https://maps.google.com/?q=47.14254,-91.46802"
-                target="_blank"
-                >📍 47.14254, -91.46802</a
-              >
-            </figcaption>
-          </figure>
-        </section>
+        <figure>
+          <a
+            href="images/IMG_20200927_072720.jpg"
+            data-lightbox="day9"
+            data-title="Taken: 2020:09:27 07:27:20<br>📍 <a href='https://maps.google.com/?q=47.37671,-91.18713' target='_blank'>47.37671, -91.18713</a>"
+          >
+            <img src="images/IMG_20200927_072720.jpg" alt="Day 9 photo" />
+          </a>
+          <figcaption>Click to view full size</figcaption>
+        </figure>
+
+        <figure>
+          <a
+            href="images/IMG_20200927_082843.jpg"
+            data-lightbox="day9"
+            data-title="Taken: 2020:09:27 08:28:43<br>📍 <a href='https://maps.google.com/?q=47.37063,-91.19158' target='_blank'>47.37063, -91.19158</a>"
+          >
+            <img src="images/IMG_20200927_082843.jpg" alt="Day 9 photo" />
+          </a>
+          <figcaption>Click to view full size</figcaption>
+        </figure>
+
+        <figure>
+          <a
+            href="images/IMG_20200927_092659.jpg"
+            data-lightbox="day9"
+            data-title="Taken: 2020:09:27 09:26:59<br>📍 <a href='https://maps.google.com/?q=47.35637,-91.22008' target='_blank'>47.35637, -91.22008</a>"
+          >
+            <img src="images/IMG_20200927_092659.jpg" alt="Day 9 photo" />
+          </a>
+          <figcaption>Click to view full size</figcaption>
+        </figure>
+
+        <figure>
+          <a
+            href="images/IMG_20200927_103200.jpg"
+            data-lightbox="day9"
+            data-title="Taken: 2020:09:27 10:32:00<br>📍 <a href='https://maps.google.com/?q=47.34127,-91.26245' target='_blank'>47.34127, -91.26245</a>"
+          >
+            <img src="images/IMG_20200927_103200.jpg" alt="Day 9 photo" />
+          </a>
+          <figcaption>Click to view full size</figcaption>
+        </figure>
+
+        <figure>
+          <a
+            href="images/IMG_20200927_143111.jpg"
+            data-lightbox="day9"
+            data-title="Taken: 2020:09:27 14:31:11<br>📍 <a href='https://maps.google.com/?q=47.32066,-91.29288' target='_blank'>47.32066, -91.29288</a>"
+          >
+            <img src="images/IMG_20200927_143111.jpg" alt="Day 9 photo" />
+          </a>
+          <figcaption>Click to view full size</figcaption>
+        </figure>
       </section>
     </main>
 

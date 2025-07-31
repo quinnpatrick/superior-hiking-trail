@@ -1,66 +1,190 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Day {{ day }} – {{ date }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 960px;
-      margin: auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #333;
-    }
-    .stats {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #777;
-      font-size: 0.9em;
-    }
-  </style>
-</head>
-<body>
-  <div id="site-header"></div>
-  <script>
-    fetch('header.html')
-      .then(response => response.text())
-      .then(data => {{
-        document.getElementById('site-header').innerHTML = data;
-      }});
-  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Day 3 – Superior Hiking Trail</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <script>
+      fetch("header.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.getElementById("site-header").innerHTML = data;
+        });
+    </script>
 
-  <main>
-    <h2>Day {{ day }} – {{ date }}</h2>
-    <div class="stats">
-      <p><strong>Total Distance:</strong> {{ distance }} miles<br>
-      <strong>Elapsed Time:</strong> {{ elapsed_time }}<br>
-      <strong>Start:</strong> {{ start }} at {{ start_time }}<br>
-      <strong>End:</strong> {{ end }} at {{ stop_time }}<br>
-      <strong>Trail Miles:</strong> {{ trail_miles }}<br>
-      <strong>Non-Trail Miles:</strong> {{ non_trail_miles }}<br>
-      <strong>Ascent:</strong> {{ ascent }} ft<br>
-      <strong>Descent:</strong> {{ descent }} ft<br>
-      <strong>Elevation Range:</strong> {{ elv_min }} - {{ elv_max }} ft</p>
-    </div>
+    <main>
+      <h1>Day 3 – September 21, 2020</h1>
 
-    <section>
-      <h3>Journal</h3>
-      <p>[Your notes for Day {{ day }} go here.]</p>
-    </section>
-  </main>
+      <div class="day-layout">
+        <section class="day-info">
+          <ul>
+            <li><strong>Distance:</strong> 20.7 miles</li>
+            <li><strong>Elapsed Time:</strong> 11:01:37</li>
+            <li><strong>Elevation Min/Max:</strong> 597 / 1,661 ft</li>
+            <li><strong>Ascent/Descent:</strong> 6,264 / 5,772 ft</li>
+            <li><strong>Start/Stop:</strong> 6:44:24 AM – 5:46:01 PM</li>
+            <li>
+              <strong>Sunrise:</strong> 6:47 AM | <strong>Sunset:</strong> 6:59
+              PM
+            </li>
+            <li>
+              <strong>Trail Miles:</strong> 17.1 |
+              <strong>Non-Trail Miles:</strong> 3.6
+            </li>
+            <li>
+              <strong>Start:</strong> Cliff Creek Campsite |
+              <strong>End:</strong> South Bally Creek Pond Campsite
+            </li>
 
-  <footer>
-    &copy; 2025 Superior Hiking Trail Journal
-  </footer>
-</body>
+            <li>
+              <strong>Weather:</strong>
+              <ul>
+                <li>High: 72°F / Low: 57°F</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Highlights:</strong>
+              <ul>
+                <li>Resupply in Grand Marais.</li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <section class="day-map">
+          <div id="trail-map" style="height: 400px; width: 100%"></div>
+        </section>
+      </div>
+
+      <section class="gallery">
+        <figure>
+          <a href="images/IMG_20200921_111126.jpg" target="_blank">
+            <img src="images/IMG_20200921_111126.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-21 11:11:26<br />
+            <a
+              href="https://maps.google.com/?q=47.60620,-90.73887"
+              target="_blank"
+              >📍 47.60620, -90.73887</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_120020.jpg" target="_blank">
+            <img src="images/IMG_20200921_120020.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-21 12:00:20<br />
+            <a
+              href="https://maps.google.com/?q=47.61143,-90.74687"
+              target="_blank"
+              >📍 47.61143, -90.74687</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_123328.jpg" target="_blank">
+            <img src="images/IMG_20200921_123328.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-21 12:33:28<br />
+            <a
+              href="https://maps.google.com/?q=47.61823,-90.75722"
+              target="_blank"
+              >📍 47.61823, -90.75722</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_134037.jpg" target="_blank">
+            <img src="images/IMG_20200921_134037.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-21 13:40:37<br />
+            <a
+              href="https://maps.google.com/?q=47.62275,-90.76618"
+              target="_blank"
+              >📍 47.62275, -90.76618</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_144210.jpg" target="_blank">
+            <img src="images/IMG_20200921_144210.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-21 14:42:10<br />
+            <a
+              href="https://maps.google.com/?q=47.62932,-90.77247"
+              target="_blank"
+              >📍 47.62932, -90.77247</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_073938.jpg" target="_blank">
+            <img src="images/IMG_20200921_073938.jpg" />
+          </a>
+          <figcaption>Taken: 2020-09-21 07:39:38</figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_092220.jpg" target="_blank">
+            <img src="images/IMG_20200921_092220.jpg" />
+          </a>
+          <figcaption>Taken: 2020-09-21 09:22:20</figcaption>
+        </figure>
+        <figure>
+          <a href="images/IMG_20200921_100901.jpg" target="_blank">
+            <img src="images/IMG_20200921_100901.jpg" />
+          </a>
+          <figcaption>Taken: 2020-09-21 10:09:01</figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        const map = L.map("trail-map").setView([47.582, -90.98], 10);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+
+        fetch("2020SHTtrip.gpx")
+          .then((res) => res.text())
+          .then((gpxText) => {
+            const parser = new DOMParser();
+            const gpx = parser.parseFromString(gpxText, "application/xml");
+            const geojson = toGeoJSON.gpx(gpx);
+
+            const tracks = geojson.features.filter(
+              (f) =>
+                f.geometry.type === "LineString" &&
+                f.properties.name === "2020-09-21 Day"
+            );
+
+            tracks.forEach((feature) => {
+              const coords = feature.geometry.coordinates.map((c) => [
+                c[1],
+                c[0],
+              ]);
+              L.polyline(coords, { color: "blue", weight: 4 }).addTo(map);
+              map.fitBounds(L.polyline(coords).getBounds());
+            });
+          })
+          .catch((err) => console.error("GPX load error:", err));
+      });
+    </script>
+  </body>
 </html>

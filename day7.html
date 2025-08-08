@@ -1,66 +1,285 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Day {{ day }} – {{ date }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 960px;
-      margin: auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #333;
-    }
-    .stats {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #777;
-      font-size: 0.9em;
-    }
-  </style>
-</head>
-<body>
-  <div id="site-header"></div>
-  <script>
-    fetch('header.html')
-      .then(response => response.text())
-      .then(data => {{
-        document.getElementById('site-header').innerHTML = data;
-      }});
-  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Day 7 – Superior Hiking Trail</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <script>
+      fetch("header.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.getElementById("site-header").innerHTML = data;
+        });
+    </script>
 
-  <main>
-    <h2>Day {{ day }} – {{ date }}</h2>
-    <div class="stats">
-      <p><strong>Total Distance:</strong> {{ distance }} miles<br>
-      <strong>Elapsed Time:</strong> {{ elapsed_time }}<br>
-      <strong>Start:</strong> {{ start }} at {{ start_time }}<br>
-      <strong>End:</strong> {{ end }} at {{ stop_time }}<br>
-      <strong>Trail Miles:</strong> {{ trail_miles }}<br>
-      <strong>Non-Trail Miles:</strong> {{ non_trail_miles }}<br>
-      <strong>Ascent:</strong> {{ ascent }} ft<br>
-      <strong>Descent:</strong> {{ descent }} ft<br>
-      <strong>Elevation Range:</strong> {{ elv_min }} - {{ elv_max }} ft</p>
-    </div>
+    <main>
+      <h1>Day 7 - September 25, 2020</h1>
 
-    <section>
-      <h3>Journal</h3>
-      <p>[Your notes for Day {{ day }} go here.]</p>
-    </section>
-  </main>
+      <div class="day-layout">
+        <section class="day-info">
+          <ul>
+            <li><strong>Distance:</strong> 17.4 miles</li>
+            <li><strong>Elapsed Time:</strong> 9:09:26</li>
+            <li><strong>Elevation Min/Max:</strong> 1,178 / 1,752 ft</li>
+            <li><strong>Ascent/Descent:</strong> 5,040 / 4,819 ft</li>
+            <li><strong>Start/Stop:</strong> 6:38:27 AM – 3:47:53 PM</li>
+            <li>
+              <strong>Sunrise:</strong> 6:52 AM | <strong>Sunset:</strong> 6:51
+              PM
+            </li>
+            <li>
+              <strong>Trail Miles:</strong> 16.1 |
+              <strong>Non-Trail Miles:</strong> 1.3
+            </li>
+            <li>
+              <strong>Start:</strong> Aspen Knob Campsite |
+              <strong>End:</strong> Section 13 Campsite
+            </li>
+            <li>
+              <strong>Weather:</strong>
+              <ul>
+                <li>High: 65°F / Low: 50°F</li>
+                <li>Rain in the evening</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Highlights:</strong>
+              <ul>
+                <li>Foggy morning</li>
+                <li>
+                  Though the new boardwalk was under construction, we didn't pay
+                  attention and took the boardwalk anyway.
+                </li>
+                <li>
+                  Rushed to get to the Section 13 site, due to impending rain.
+                  We got the hammocks set up just before the rain started.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </section>
 
-  <footer>
-    &copy; 2025 Superior Hiking Trail Journal
-  </footer>
-</body>
+        <section class="day-map">
+          <div id="trail-map" style="height: 400px; width: 100%"></div>
+        </section>
+      </div>
+      <section class="gallery">
+        <figure>
+          <a href="images/day7/IMG_20200924_070731.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_070731.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 07:07:32<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_072119.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_072119.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 07:21:19<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_080244.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_080244.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 08:02:44<br />
+            <a
+              href="https://maps.google.com/?q=47.549928,-90.953225"
+              target="_blank"
+              >📍 47.54993, -90.95323</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_080359.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_080359.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 08:04:00<br />
+            <a
+              href="https://maps.google.com/?q=47.549981,-90.953014"
+              target="_blank"
+              >📍 47.54998, -90.95301</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_085214.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_085214.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 08:52:14<br />
+            <a
+              href="https://maps.google.com/?q=47.536758,-90.982442"
+              target="_blank"
+              >📍 47.53676, -90.98244</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_091111.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_091111.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 09:11:12<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_111247.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_111247.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 11:12:48<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_113908.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_113908.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 11:39:08<br />
+            <a
+              href="https://maps.google.com/?q=47.482803,-91.015483"
+              target="_blank"
+              >📍 47.48280, -91.01548</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_122144.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_122144.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 12:21:45<br />
+            <a
+              href="https://maps.google.com/?q=47.470575,-91.032903"
+              target="_blank"
+              >📍 47.47057, -91.03290</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_134229.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_134229.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 13:42:30<br />
+            <a
+              href="https://maps.google.com/?q=47.477667,-91.075384"
+              target="_blank"
+              >📍 47.47767, -91.07538</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_153125.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_153125.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 15:31:25<br />
+            <a
+              href="https://maps.google.com/?q=47.480903,-91.097819"
+              target="_blank"
+              >📍 47.48090, -91.09782</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day7/IMG_20200924_155115.jpg" target="_blank">
+            <img src="images/day7/IMG_20200924_155115.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-24 15:51:16<br />
+            <a
+              href="https://maps.google.com/?q=47.479897,-91.100178"
+              target="_blank"
+              >📍 47.47990, -91.10018</a
+            >
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        const map = L.map("trail-map").setView([47.38, -91.247], 7);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        const campsiteIcon = L.icon({
+          iconUrl: "icons/campsite.png", // Adjust the path as needed
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -10],
+        });
+
+        fetch("2020SHTtrip.gpx")
+          .then((res) => res.text())
+          .then((gpxText) => {
+            const parser = new DOMParser();
+            const gpx = parser.parseFromString(gpxText, "application/xml");
+            const geojson = toGeoJSON.gpx(gpx);
+
+            // 🎯 1. Show only the track named "2020-09-26 06:38:52 Day"
+            const tracks = geojson.features.filter(
+              (f) =>
+                f.geometry.type === "LineString" &&
+                f.properties.name === "2020-09-25 Day"
+            );
+
+            tracks.forEach((feature) => {
+              const coords = feature.geometry.coordinates.map((c) => [
+                c[1],
+                c[0],
+              ]);
+              L.polyline(coords, { color: "blue", weight: 4 }).addTo(map);
+              map.fitBounds(L.polyline(coords).getBounds());
+            });
+
+            // 🏕 2. Add all waypoints with appropriate icons
+            geojson.features
+              .filter((f) => f.geometry.type === "Point")
+              .forEach((feature) => {
+                const lat = feature.geometry.coordinates[1];
+                const lon = feature.geometry.coordinates[0];
+                const name = feature.properties.name || "Unnamed";
+                const sym = feature.properties.sym || "";
+
+                const icon =
+                  sym === "Campground"
+                    ? campsiteIcon
+                    : L.icon({
+                        iconUrl:
+                          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                      });
+
+                L.marker([lat, lon], { icon })
+                  .addTo(map)
+                  .bindPopup(`${sym === "Campground" ? "🏕 " : "📍 "}${name}`);
+              });
+          })
+          .catch((err) => console.error("GPX load error:", err));
+      });
+    </script>
+  </body>
 </html>

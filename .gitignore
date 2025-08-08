@@ -1,0 +1,5 @@
+node_modules/
+.sfdx/
+package-lock.json
+package.json
+*.js

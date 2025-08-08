@@ -1,66 +1,254 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Day {{ day }} – {{ date }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 960px;
-      margin: auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #333;
-    }
-    .stats {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #777;
-      font-size: 0.9em;
-    }
-  </style>
-</head>
-<body>
-  <div id="site-header"></div>
-  <script>
-    fetch('header.html')
-      .then(response => response.text())
-      .then(data => {{
-        document.getElementById('site-header').innerHTML = data;
-      }});
-  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Day 5 – Superior Hiking Trail</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <div id="site-header"></div>
+    <script>
+      fetch("header.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.getElementById("site-header").innerHTML = data;
+        });
+    </script>
 
-  <main>
-    <h2>Day {{ day }} – {{ date }}</h2>
-    <div class="stats">
-      <p><strong>Total Distance:</strong> {{ distance }} miles<br>
-      <strong>Elapsed Time:</strong> {{ elapsed_time }}<br>
-      <strong>Start:</strong> {{ start }} at {{ start_time }}<br>
-      <strong>End:</strong> {{ end }} at {{ stop_time }}<br>
-      <strong>Trail Miles:</strong> {{ trail_miles }}<br>
-      <strong>Non-Trail Miles:</strong> {{ non_trail_miles }}<br>
-      <strong>Ascent:</strong> {{ ascent }} ft<br>
-      <strong>Descent:</strong> {{ descent }} ft<br>
-      <strong>Elevation Range:</strong> {{ elv_min }} - {{ elv_max }} ft</p>
-    </div>
+    <main>
+      <h1>Day 5 - September 23, 2020</h1>
 
-    <section>
-      <h3>Journal</h3>
-      <p>[Your notes for Day {{ day }} go here.]</p>
-    </section>
-  </main>
+      <div class="day-layout">
+        <section class="day-info">
+          <ul>
+            <li><strong>Distance:</strong> 23.0 miles</li>
+            <li><strong>Elapsed Time:</strong> 11:37:18</li>
+            <li><strong>Elevation Min/Max:</strong> 559 / 1,678 ft</li>
+            <li><strong>Ascent/Descent:</strong> 7,578 / 7,518 ft</li>
+            <li><strong>Start/Stop:</strong> 6:26:50 AM – 6:06:08 PM</li>
+            <li>
+              <strong>Sunrise:</strong> 6:50 AM | <strong>Sunset:</strong> 6:55
+              PM
+            </li>
+            <li>
+              <strong>Trail Miles:</strong> 23.0 |
+              <strong>Non-Trail Miles:</strong> 0.0
+            </li>
+            <li>
+              <strong>Start:</strong> West Poplar River Campsite |
+              <strong>End:</strong> Ledge Campsite
+            </li>
+            <li>
+              <strong>Weather:</strong>
+              <ul>
+                <li>High: 56°F / Low: 51°F</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Highlights:</strong>
+              <ul>
+                <li>.</li>
+              </ul>
+            </li>
+          </ul>
+        </section>
 
-  <footer>
-    &copy; 2025 Superior Hiking Trail Journal
-  </footer>
-</body>
+        <section class="day-map">
+          <div id="trail-map" style="height: 400px; width: 100%"></div>
+        </section>
+      </div>
+      <section class="gallery">
+        <figure>
+          <a href="images/day5/IMG_20200923_064433.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_064433.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 06:44:34<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_071405.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_071405.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 07:14:05<br />
+            <a
+              href="https://maps.google.com/?q=47.668239,-90.720781"
+              target="_blank"
+              >📍 47.66824, -90.72078</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_071443.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_071443.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 07:14:44<br />
+            <a
+              href="https://maps.google.com/?q=47.668239,-90.720781"
+              target="_blank"
+              >📍 47.66824, -90.72078</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_075208.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_075208.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 07:52:09<br />
+            <a
+              href="https://maps.google.com/?q=47.667742,-90.731653"
+              target="_blank"
+              >📍 47.66774, -90.73165</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_095902.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_095902.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 09:59:02<br />
+            <a
+              href="https://maps.google.com/?q=47.636317,-90.754067"
+              target="_blank"
+              >📍 47.63632, -90.75407</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_102632.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_102632.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 10:26:32<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_124926.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_124926.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 12:49:26<br />
+            <span>📍 Location not available</span>
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_152231.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_152231.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 15:22:31<br />
+            <a
+              href="https://maps.google.com/?q=47.563617,-90.882803"
+              target="_blank"
+              >📍 47.56362, -90.88280</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_155510.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_155510.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 15:55:11<br />
+            <a
+              href="https://maps.google.com/?q=47.557875,-90.876817"
+              target="_blank"
+              >📍 47.55788, -90.87682</a
+            >
+          </figcaption>
+        </figure>
+        <figure>
+          <a href="images/day5/IMG_20200923_163634.jpg" target="_blank">
+            <img src="images/day5/IMG_20200923_163634.jpg" />
+          </a>
+          <figcaption>
+            Taken: 2020-09-23 16:36:34<br />
+            <a
+              href="https://maps.google.com/?q=47.558056,-90.877219"
+              target="_blank"
+              >📍 47.55806, -90.87722</a
+            >
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        const map = L.map("trail-map").setView([47.38, -91.247], 7);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        const campsiteIcon = L.icon({
+          iconUrl: "icons/campsite.png", // Adjust the path as needed
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -10],
+        });
+
+        fetch("2020SHTtrip.gpx")
+          .then((res) => res.text())
+          .then((gpxText) => {
+            const parser = new DOMParser();
+            const gpx = parser.parseFromString(gpxText, "application/xml");
+            const geojson = toGeoJSON.gpx(gpx);
+
+            // 🎯 1. Show only the track named "2020-09-26 06:38:52 Day"
+            const tracks = geojson.features.filter(
+              (f) =>
+                f.geometry.type === "LineString" &&
+                f.properties.name === "2020-09-23 Day"
+            );
+
+            tracks.forEach((feature) => {
+              const coords = feature.geometry.coordinates.map((c) => [
+                c[1],
+                c[0],
+              ]);
+              L.polyline(coords, { color: "blue", weight: 4 }).addTo(map);
+              map.fitBounds(L.polyline(coords).getBounds());
+            });
+
+            // 🏕 2. Add all waypoints with appropriate icons
+            geojson.features
+              .filter((f) => f.geometry.type === "Point")
+              .forEach((feature) => {
+                const lat = feature.geometry.coordinates[1];
+                const lon = feature.geometry.coordinates[0];
+                const name = feature.properties.name || "Unnamed";
+                const sym = feature.properties.sym || "";
+
+                const icon =
+                  sym === "Campground"
+                    ? campsiteIcon
+                    : L.icon({
+                        iconUrl:
+                          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                      });
+
+                L.marker([lat, lon], { icon })
+                  .addTo(map)
+                  .bindPopup(`${sym === "Campground" ? "🏕 " : "📍 "}${name}`);
+              });
+          })
+          .catch((err) => console.error("GPX load error:", err));
+      });
+    </script>
+  </body>
 </html>

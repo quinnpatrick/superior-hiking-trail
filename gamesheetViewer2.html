@@ -364,7 +364,7 @@
     <div id="status" class="status"></div>
   </div>
 
-  <!-- Tables -->
+  <!-- Goals & Penalties -->
   <div class="grid">
     <div class="card">
       <div class="card-header">
@@ -387,26 +387,45 @@
     </div>
   </div>
 
+  <!-- Shots on Goal card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        Shots on Goal
+        <span class="chip">SOG by Period</span>
+      </div>
+    </div>
+    <div id="shotsContainer" class="muted">No shot data yet. Load a game to see shots by period.</div>
+  </div>
+
+  <!-- Shootout card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        Shootout
+        <span class="chip">SO Summary</span>
+      </div>
+    </div>
+    <div id="shootoutContainer" class="muted">No shootout for this game.</div>
+  </div>
+
   <div class="footer-note">
     ⚙️ If a table comes up empty, the JSON structure might use slightly different keys.
-    You can tweak the <code>extractScoring</code>, <code>extractPenalties</code>, or <code>parseUnifiedGames</code> helpers in the script.
+    You can tweak the <code>extractScoring</code>, <code>extractPenalties</code>, <code>extractShots</code>, <code>extractShootout</code>, or <code>parseUnifiedGames</code> helpers in the script.
   </div>
 </div>
 
 <script>
   // --- Config ---
 
-  // Unified games API for Bemidji PWB1 (returns the date/home/visitor/etc structure you pasted)
   const UNIFIED_GAMES_URL =
     "https://gamesheetstats.com/api/useUnifiedGames/10857?filter[gametype]=overall&filter[limit]=100&filter[offset]=0&filter[teams]=431186&filter[timeZoneOffset]=-";
 
-  // Base prefix for JSON game API. Adjust org/season ID (11180) if needed.
   const GAME_JSON_PREFIX =
     "https://gamesheetstats.com/api/useBoxScore/getGameStats/11180/games/";
 
   // --- Multi-team roster mapping (jersey -> player name) ---
   const TEAM_ROSTERS = {
-
     bemidji: {
       teamIds: [431186], // Bemidji PWB1 Blue
       nameMatch: ["bemidji", "Bemidji PW", "BYHA", "Bemidji"],
@@ -438,7 +457,6 @@
     for (const teamKey of Object.keys(TEAM_ROSTERS)) {
       const cfg = TEAM_ROSTERS[teamKey];
 
-      // 1) ID match (most reliable)
       if (idStr && Array.isArray(cfg.teamIds)) {
         for (const knownId of cfg.teamIds) {
           if (String(knownId) === idStr) {
@@ -447,7 +465,6 @@
         }
       }
 
-      // 2) Name substring match
       if (name && Array.isArray(cfg.nameMatch)) {
         for (const match of cfg.nameMatch) {
           if (name.includes(String(match).toLowerCase())) {
@@ -522,7 +539,6 @@
       return out;
     }
 
-    // Fallbacks for other shapes
     if (Array.isArray(json.scoring)) return json.scoring;
     if (json.game && Array.isArray(json.game.scoring)) return json.game.scoring;
     if (Array.isArray(json.goals)) return json.goals;
@@ -705,6 +721,108 @@
     };
   }
 
+  // --- Shootout extraction (from json.tables.shootoutSummaryVisitor/Home) ---
+
+  function extractShootout(json) {
+    const tables = json.tables || {};
+    const vis = tables.shootoutSummaryVisitor || null;
+    const home = tables.shootoutSummaryHome || null;
+    const out = [];
+
+    const visitorTeamName = json.visitor?.title || "Visitor";
+    const homeTeamName = json.home?.title || "Home";
+
+    function addSide(block, isHome) {
+      if (!block || typeof block !== "object") return;
+      const count = Array.isArray(block.number) ? block.number.length : 0;
+
+      for (let i = 0; i < count; i++) {
+        out.push({
+          attempt: block.number?.[i] ?? (i + 1),
+          side: isHome ? "Home" : "Visitor",
+          team: isHome ? homeTeamName : visitorTeamName,
+          shooter: block.player?.[i] || "",
+          shooterId: block.playerId?.[i] || "",
+          goalie: block.goalie?.[i] || "",
+          goalieId: block.goalieId?.[i] || "",
+          result: block.result?.[i] || ""
+        });
+      }
+    }
+
+    addSide(vis, false);
+    addSide(home, true);
+
+    out.sort((a, b) => {
+      const an = Number(a.attempt);
+      const bn = Number(b.attempt);
+      if (!isNaN(an) && !isNaN(bn) && an !== bn) return an - bn;
+      return 0;
+    });
+
+    return out;
+  }
+
+  // --- Shots on goal extraction (from json.tables.shots) ---
+
+  function extractShots(json) {
+    const shots = json.tables?.shots;
+    if (!shots || typeof shots !== "object") return null;
+
+    const titles = Array.isArray(shots.title) ? shots.title : [];
+    const finals = Array.isArray(shots.final) ? shots.final : [];
+    const byPeriod = Array.isArray(shots.shotsByPeriod) ? shots.shotsByPeriod : [];
+
+    // Determine which index is visitor vs home by matching IDs if we can
+    const visitorId = json.visitor?.id;
+    const homeId = json.home?.id;
+
+    let idxVisitor = 0;
+    let idxHome = 1;
+
+    if (titles.length >= 2 && (visitorId != null || homeId != null)) {
+      for (let i = 0; i < titles.length; i++) {
+        const tid = titles[i]?.id;
+        if (tid != null) {
+          if (String(tid) === String(visitorId)) idxVisitor = i;
+          if (String(tid) === String(homeId)) idxHome = i;
+        }
+      }
+    }
+
+    const visitorName = titles[idxVisitor]?.title || (json.visitor?.title || "Visitor");
+    const homeName = titles[idxHome]?.title || (json.home?.title || "Home");
+
+    const visitorFinal = finals[idxVisitor] ?? (json.visitor?.sog ?? "");
+    const homeFinal = finals[idxHome] ?? (json.home?.sog ?? "");
+
+    const periods = byPeriod.map(p => {
+      const data = Array.isArray(p.data) ? p.data : [];
+      return {
+        period: p.period || "",
+        visitor: data[idxVisitor] ?? "",
+        home: data[idxHome] ?? ""
+      };
+    });
+
+    return {
+      visitorName,
+      homeName,
+      visitorFinal,
+      homeFinal,
+      periods
+    };
+  }
+
+  function parseHashName(label) {
+    if (!label) return { number: "", name: "" };
+    const m = String(label).match(/^#?(\d+)\s+(.+)$/);
+    if (m) {
+      return { number: m[1], name: m[2] };
+    }
+    return { number: "", name: label };
+  }
+
   // --- Rendering helpers ---
 
   function renderTeamCell(name, logoUrl, teamId) {
@@ -714,7 +832,6 @@
       ? '<span class="tag-team">' + safeName + '</span>'
       : safeName;
 
-    
     return '<div class="team-cell">' + nameSpan + '</div>';
   }
 
@@ -826,10 +943,102 @@
     `;
   }
 
+  function renderShootoutTable(entries) {
+    if (!entries.length) {
+      return '<div class="muted">No shootout attempts recorded for this game.</div>';
+    }
+
+    const rows = entries.map((e, idx) => {
+      const shooter = parseHashName(e.shooter);
+      const goalie = parseHashName(e.goalie);
+
+      return `
+        <tr>
+          <td>${e.attempt ?? (idx + 1)}</td>
+          <td>${e.team || ""}</td>
+          <td>${e.side || ""}</td>
+          <td>${shooter.name || e.shooter || ""}</td>
+          <td>${shooter.number || ""}</td>
+          <td>${goalie.name || e.goalie || ""}</td>
+          <td>${goalie.number || ""}</td>
+          <td>${e.result || ""}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>Attempt</th>
+            <th>Team</th>
+            <th>Side</th>
+            <th>Shooter</th>
+            <th>#</th>
+            <th>Goalie</th>
+            <th>G #</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderShotsTable(summary) {
+    if (!summary) {
+      return '<div class="muted">No shot data found in JSON. Check <code>tables.shots</code> structure.</div>';
+    }
+
+    const rows = summary.periods.map(p => {
+      return `
+        <tr>
+          <td>${p.period || ""}</td>
+          <td>${summary.visitorName}</td>
+          <td>${p.visitor}</td>
+          <td>${summary.homeName}</td>
+          <td>${p.home}</td>
+        </tr>
+      `;
+    }).join("");
+
+    const totalsRow = `
+      <tr>
+        <td><strong>Total</strong></td>
+        <td><strong>${summary.visitorName}</strong></td>
+        <td><strong>${summary.visitorFinal}</strong></td>
+        <td><strong>${summary.homeName}</strong></td>
+        <td><strong>${summary.homeFinal}</strong></td>
+      </tr>
+    `;
+
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Visitor</th>
+            <th>V SOG</th>
+            <th>Home</th>
+            <th>H SOG</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+          ${totalsRow}
+        </tbody>
+      </table>
+      <div class="note">
+        Uses <code>tables.shots.shotsByPeriod</code> and <code>tables.shots.final</code>. If those are missing,
+        it will fall back to team-level <code>home.sog</code>/<code>visitor.sog</code> where available.
+      </div>
+    `;
+  }
+
   // --- Unified Games API: parse & render list at top ---
 
-  // Uses the exact structure you pasted:
-  // { date: [...], visitor: [...], home: [...], details: [...], gameId: [...], location: [...] }
   function parseUnifiedGames(json) {
     const dates    = Array.isArray(json.date)     ? json.date     : [];
     const homeArr  = Array.isArray(json.home)     ? json.home     : [];
@@ -883,7 +1092,7 @@
       const awayLogo   = visit.logo || "";
 
       const location   = locs[i] || "";
-      const detailText = details[i] || ""; // often result or time string
+      const detailText = details[i] || "";
 
       const dateTimeLabel = [dateStr, timeStr].filter(Boolean).join(" ");
       const teamsLabel    = `${awayTitle} @ ${homeTitle}`;
@@ -979,6 +1188,8 @@
   const statusEl = document.getElementById("status");
   const goalsContainer = document.getElementById("goalsContainer");
   const penaltiesContainer = document.getElementById("penaltiesContainer");
+  const shootoutContainer = document.getElementById("shootoutContainer");
+  const shotsContainer = document.getElementById("shotsContainer");
   const loadScheduleBtn = document.getElementById("loadScheduleBtn");
   const scheduleContainer = document.getElementById("scheduleContainer");
 
@@ -996,6 +1207,8 @@
 
     goalsContainer.innerHTML = '<div class="muted">Loading goals…</div>';
     penaltiesContainer.innerHTML = '<div class="muted">Loading penalties…</div>';
+    shootoutContainer.innerHTML = '<div class="muted">Loading shootout (if any)…</div>';
+    shotsContainer.innerHTML = '<div class="muted">Loading shots on goal…</div>';
 
     try {
       const resp = await fetch(url);
@@ -1007,9 +1220,13 @@
 
       const scoring = extractScoring(json);
       const penalties = extractPenalties(json);
+      const shootoutEntries = extractShootout(json);
+      const shotsSummary = extractShots(json);
 
       goalsContainer.innerHTML = renderGoalsTable(scoring);
       penaltiesContainer.innerHTML = renderPenaltiesTable(penalties);
+      shootoutContainer.innerHTML = renderShootoutTable(shootoutEntries);
+      shotsContainer.innerHTML = renderShotsTable(shotsSummary);
 
       statusEl.textContent =
         "Game data loaded. If tables look off, tweak the key mappings in the script.";
@@ -1021,6 +1238,8 @@
       statusEl.className = "status error";
       goalsContainer.innerHTML = '<div class="muted">No data.</div>';
       penaltiesContainer.innerHTML = '<div class="muted">No data.</div>';
+      shootoutContainer.innerHTML = '<div class="muted">No data.</div>';
+      shotsContainer.innerHTML = '<div class="muted">No data.</div>';
     } finally {
       loadBtn.disabled = false;
     }
@@ -1036,7 +1255,6 @@
 
   loadScheduleBtn.addEventListener("click", loadSchedule);
 
-  // Delegate clicks from schedule list -> load specific game
   scheduleContainer.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-json-url]");
     if (!btn) return;

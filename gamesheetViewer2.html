@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GameSheetStats – Multi-Team Game Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0b1120;
+      --bg-alt: #020617;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.1);
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --danger: #f97373;
+      --success: #4ade80;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #0f172a 0, #020617 40%, #000 100%);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: var(--text-soft);
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .links-row {
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+    }
+
+    .links-row a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(56,189,248,0.6);
+    }
+
+    .links-row a:hover {
+      border-bottom-style: solid;
+    }
+
+    .card {
+      background: linear-gradient(135deg, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      padding: 18px 20px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .input-row input[type="text"] {
+      flex: 1 1 260px;
+      min-width: 0;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15,23,42,0.9);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .input-row input[type="text"]::placeholder {
+      color: #6b7280;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      padding: 8px 18px;
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: #0b1120;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    button span.icon {
+      font-size: 1rem;
+    }
+
+    .status {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.success {
+      color: var(--success);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 0.85rem;
+      background: rgba(15,23,42,0.95);
+    }
+
+    thead {
+      background: linear-gradient(135deg, rgba(30,64,175,0.9), rgba(37,99,235,0.9));
+    }
+
+    th, td {
+      padding: 7px 8px;
+      border-bottom: 1px solid rgba(31,41,55,0.9);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      text-transform: uppercase;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15,23,42,0.85);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(17,24,39,0.7);
+    }
+
+    tbody tr:hover {
+      background: rgba(37,99,235,0.25);
+    }
+
+    .pill {
+      display: inline-flex;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148,163,184,0.85);
+      color: #e5e7eb;
+    }
+
+    .pill-ev { border-color: #22c55e; }
+    .pill-pp { border-color: #facc15; }
+    .pill-sh { border-color: #f97316; }
+
+    .muted {
+      color: var(--text-soft);
+      font-size: 0.8rem;
+    }
+
+    .tag-team {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .team-logo {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: #020617;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    .footer-note {
+      font-size: 0.78rem;
+      color: #6b7280;
+      margin-top: 16px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.78rem;
+      background: rgba(15,23,42,0.9);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    /* Schedule styles */
+    .schedule-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.83rem;
+    }
+
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(31,41,55,0.7);
+      gap: 8px;
+    }
+
+    .schedule-item:last-child {
+      border-bottom: none;
+    }
+
+    .schedule-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .schedule-main {
+      color: #e5e7eb;
+    }
+
+    .schedule-sub {
+      color: var(--text-soft);
+      font-size: 0.75rem;
+    }
+
+    .schedule-load-btn {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>GameSheetStats Viewer</h1>
+  <div class="subtitle">
+    Enter a GameSheetStats JSON URL to see nicely formatted goals, assists, and penalties.<br>
+    Known rosters (e.g. Warroad, Bemidji) are mapped to player names automatically.
+  </div>
+
+  <!-- Bemidji schedule card (top of page) -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        Bemidji Schedule
+        <span class="chip">Unified Games API</span>
+      </div>
+      <button id="loadScheduleBtn">
+        <span class="icon">📋</span>
+        Load Schedule
+      </button>
+    </div>
+    <div id="scheduleStatus" class="status"></div>
+    <div id="scheduleContainer" class="muted">
+      Click "Load Schedule" to fetch Bemidji games (via API) and quickly load any game.
+    </div>
+  </div>
+
+  <!-- URL + Load -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">
+          Game JSON URL
+          <span class="chip">Input</span>
+        </div>
+        <div class="note">
+          Example: <code>https://gamesheetstats.com/api/useBoxScore/getGameStats/11180/games/2607748</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <input
+        type="text"
+        id="urlInput"
+        value="https://gamesheetstats.com/api/useBoxScore/getGameStats/11180/games/2607748"
+        placeholder="Paste GameSheetStats JSON URL here…" />
+      <button id="loadBtn">
+        <span class="icon">📡</span>
+        Load Game
+      </button>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <!-- Tables -->
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          Goals
+          <span class="chip">Scoring Summary</span>
+        </div>
+      </div>
+      <div id="goalsContainer" class="muted">No data yet. Load a game to see goals.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          Penalties
+          <span class="chip">PIM Summary</span>
+        </div>
+      </div>
+      <div id="penaltiesContainer" class="muted">No data yet. Load penalties.</div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    ⚙️ If a table comes up empty, the JSON structure might use slightly different keys.
+    You can tweak the <code>extractScoring</code>, <code>extractPenalties</code>, or <code>parseUnifiedGames</code> helpers in the script.
+  </div>
+</div>
+
+<script>
+  // --- Config ---
+
+  // Unified games API for Bemidji PWB1 (returns the date/home/visitor/etc structure you pasted)
+  const UNIFIED_GAMES_URL =
+    "https://gamesheetstats.com/api/useUnifiedGames/10857?filter[gametype]=overall&filter[limit]=100&filter[offset]=0&filter[teams]=431186&filter[timeZoneOffset]=-";
+
+  // Base prefix for JSON game API. Adjust org/season ID (11180) if needed.
+  const GAME_JSON_PREFIX =
+    "https://gamesheetstats.com/api/useBoxScore/getGameStats/11180/games/";
+
+  // --- Multi-team roster mapping (jersey -> player name) ---
+  const TEAM_ROSTERS = {
+
+    bemidji: {
+      teamIds: [431186], // Bemidji PWB1 Blue
+      nameMatch: ["bemidji", "Bemidji PW", "BYHA", "Bemidji"],
+      players: {
+        "25": "Myles Clay",
+        "30": "Jeffrey Everhart",
+        "27": "Alex Garrison",
+        "21": "Alex Garrison",
+        "19": "Ozzy Gould",
+        "18": "Owen Grand",
+        "16": "Boston Hendricks",
+        "20": "Kaden Kaiser",
+        "26": "Jaxson Lossing",
+        "17": "Thatcher Puschinsky",
+        "33": "Henry Quinn",
+        "23": "Logan Seibel",
+        "15": "Bryce Sherwood",
+        "22": "Johnathan Thomas",
+        "24": "Joey Van Vynckt",
+        "41": "Grant Williams"
+      }
+    }
+  };
+
+  function findTeamKey(teamName, teamId) {
+    const idStr = teamId != null ? String(teamId) : null;
+    const name = teamName ? String(teamName).toLowerCase() : "";
+
+    for (const teamKey of Object.keys(TEAM_ROSTERS)) {
+      const cfg = TEAM_ROSTERS[teamKey];
+
+      // 1) ID match (most reliable)
+      if (idStr && Array.isArray(cfg.teamIds)) {
+        for (const knownId of cfg.teamIds) {
+          if (String(knownId) === idStr) {
+            return teamKey;
+          }
+        }
+      }
+
+      // 2) Name substring match
+      if (name && Array.isArray(cfg.nameMatch)) {
+        for (const match of cfg.nameMatch) {
+          if (name.includes(String(match).toLowerCase())) {
+            return teamKey;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  function getPlayerNameFromTeam(jersey, teamName, teamId) {
+    if (!jersey) return "";
+    const j = String(jersey);
+
+    const teamKey = findTeamKey(teamName, teamId);
+    if (!teamKey) return "#" + j;
+
+    const roster = TEAM_ROSTERS[teamKey].players || {};
+    return roster[j] || "#" + j;
+  }
+
+  function isKnownTeam(teamName, teamId) {
+    return !!findTeamKey(teamName, teamId);
+  }
+
+  // --- Scoring extraction (from json.tables.goalsByPeriod) ---
+
+  function extractScoring(json) {
+    const out = [];
+
+    if (json.tables && Array.isArray(json.tables.goalsByPeriod)) {
+      json.tables.goalsByPeriod.forEach(periodBlock => {
+        const periodLabel = periodBlock.period || "";
+        const periodEvents = periodBlock.periodEvents || [];
+
+        periodEvents.forEach(ev => {
+          if (ev.eventType !== "goal") return;
+
+          const teamTitle = ev.team?.title || "";
+          const teamId    = ev.team?.id;
+          const teamLogo  = ev.team?.logo;
+
+          let strength = "";
+          if (ev.powerPlay) strength = "PP";
+          else if (ev.shg) strength = "SH";
+          else strength = "EV";
+
+          if (ev.en) {
+            strength = strength ? strength + " EN" : "EN";
+          }
+
+          let notes = "";
+          if (ev.gameWinningGoal) notes = "GWG";
+
+          out.push({
+            period: ev.period || periodLabel,
+            periodLabel,
+            time: ev.time,
+            team: teamTitle,
+            teamId,
+            teamLogo,
+            jersey: ev.goalScorer?.number || "",
+            a1:     ev.assist1By?.number  || "",
+            a2:     ev.assist2By?.number  || "",
+            strength,
+            notes
+          });
+        });
+      });
+
+      return out;
+    }
+
+    // Fallbacks for other shapes
+    if (Array.isArray(json.scoring)) return json.scoring;
+    if (json.game && Array.isArray(json.game.scoring)) return json.game.scoring;
+    if (Array.isArray(json.goals)) return json.goals;
+
+    for (const key of Object.keys(json)) {
+      const val = json[key];
+      if (Array.isArray(val) && val.length && typeof val[0] === "object") {
+        const first = val[0];
+        if (("period" in first || "per" in first) &&
+            ("time"   in first || "clock" in first)) {
+          return val;
+        }
+      }
+    }
+    return [];
+  }
+
+  function normalizeGoal(rec) {
+    return {
+      period:      rec.period ?? rec.per ?? rec.periodLabel ?? "",
+      periodLabel: rec.periodLabel ?? "",
+      time:        rec.time ?? rec.clock ?? "",
+      team:        rec.teamTitle ?? rec.team ?? rec.teamCode ?? rec.team_name ?? "",
+      teamId:      rec.teamId ?? rec.team_id ?? null,
+      teamLogo:    rec.teamLogo ?? rec.logo ?? null,
+      jersey: rec.jersey ??
+              rec.goalJersey ??
+              rec.playerNumber ??
+              rec.goal_sweater ??
+              rec.goalScorerNumber ??
+              "",
+      a1:     rec.a1 ??
+              rec.assist1Jersey ??
+              rec.assist1 ??
+              rec.assist_1_sweater ??
+              "",
+      a2:     rec.a2 ??
+              rec.assist2Jersey ??
+              rec.assist2 ??
+              rec.assist_2_sweater ??
+              "",
+      strength: rec.strength ?? rec.situation ?? rec.play_type ?? "",
+      notes:    rec.notes ?? rec.description ?? rec.detail ?? rec.note ?? ""
+    };
+  }
+
+  // --- Penalties extraction (from json.tables) ---
+
+  function extractPenalties(json) {
+    const out = [];
+    const tables = json.tables;
+
+    if (Array.isArray(tables)) {
+      tables.forEach(periodBlock => {
+        if (periodBlock.type !== "penalty") return;
+        const periodLabel = periodBlock.period || "";
+        const periodEvents = periodBlock.periodEvents || [];
+
+        periodEvents.forEach(ev => {
+          if (ev.eventType !== "penalty") return;
+
+          const teamTitle = ev.team?.title || "";
+          const teamId    = ev.team?.id;
+          const teamLogo  = ev.team?.logo;
+
+          const committedNum = ev.commitedBy?.number || "";
+          const servedNum    = ev.servedBy?.number   || committedNum;
+
+          const penType  = ev.penaltyType?.title    || "";
+          const duration = ev.penaltyType?.duration || "";
+          const penClass = ev.penaltyType?.class    || "";
+
+          out.push({
+            period:      ev.period || periodLabel,
+            periodLabel,
+            time:        ev.time,
+            team:        teamTitle,
+            teamId,
+            teamLogo,
+            jersey:      committedNum,
+            servedJersey: servedNum,
+            minutes:     duration,
+            infraction:  penType,
+            penaltyClass: penClass,
+            major:       !!ev.major
+          });
+        });
+      });
+
+      if (out.length) return out;
+    }
+
+    if (tables && typeof tables === "object" && !Array.isArray(tables)) {
+      for (const key of Object.keys(tables)) {
+        const blockArray = tables[key];
+        if (!Array.isArray(blockArray)) continue;
+
+        blockArray.forEach(periodBlock => {
+          if (periodBlock.type !== "penalty") return;
+          const periodLabel = periodBlock.period || "";
+          const periodEvents = periodBlock.periodEvents || [];
+
+          periodEvents.forEach(ev => {
+            if (ev.eventType !== "penalty") return;
+
+            const teamTitle = ev.team?.title || "";
+            const teamId    = ev.team?.id;
+            const teamLogo  = ev.team?.logo;
+
+            const committedNum = ev.commitedBy?.number || "";
+            const servedNum    = ev.servedBy?.number   || committedNum;
+
+            const penType  = ev.penaltyType?.title    || "";
+            const duration = ev.penaltyType?.duration || "";
+            const penClass = ev.penaltyType?.class    || "";
+
+            out.push({
+              period:      ev.period || periodLabel,
+              periodLabel,
+              time:        ev.time,
+              team:        teamTitle,
+              teamId,
+              teamLogo,
+              jersey:      committedNum,
+              servedJersey: servedNum,
+              minutes:     duration,
+              infraction:  penType,
+              penaltyClass: penClass,
+              major:       !!ev.major
+            });
+          });
+        });
+      }
+
+      if (out.length) return out;
+    }
+
+    if (Array.isArray(json.penalties)) return json.penalties;
+    if (Array.isArray(json.pims)) return json.pims;
+    if (json.game && Array.isArray(json.game.penalties)) return json.game.penalties;
+
+    for (const key of Object.keys(json)) {
+      const val = json[key];
+      if (Array.isArray(val) && val.length && typeof val[0] === "object") {
+        const first = val[0];
+        const hasPeriod = ("period" in first || "per" in first);
+        const hasInf = ("infraction" in first || "penalty" in first || "minutes" in first || "min" in first);
+        if (hasPeriod && hasInf) {
+          return val;
+        }
+      }
+    }
+
+    return [];
+  }
+
+  function normalizePenalty(rec) {
+    return {
+      period:       rec.period ?? rec.per ?? rec.periodLabel ?? "",
+      periodLabel:  rec.periodLabel ?? "",
+      time:         rec.time ?? rec.clock ?? "",
+      team:         rec.teamTitle ?? rec.team ?? rec.teamCode ?? rec.team_name ?? "",
+      teamId:       rec.teamId ?? rec.team_id ?? null,
+      teamLogo:     rec.teamLogo ?? rec.logo ?? null,
+      jersey:       rec.jersey ??
+                    rec.playerNumber ??
+                    rec.sweater ??
+                    rec.commitedByNumber ??
+                    "",
+      servedJersey: rec.servedJersey ?? "",
+      minutes:      rec.minutes ?? rec.min ?? rec.duration ?? rec.penaltyMinutes ?? "",
+      infraction:   rec.infraction ??
+                    rec.penalty ??
+                    rec.call ??
+                    rec.description ??
+                    rec.note ??
+                    "",
+      penaltyClass: rec.penaltyClass ?? "",
+      major:        !!rec.major
+    };
+  }
+
+  // --- Rendering helpers ---
+
+  function renderTeamCell(name, logoUrl, teamId) {
+    const safeName = name || "";
+    const isKnown = isKnownTeam(name, teamId);
+    const nameSpan = isKnown
+      ? '<span class="tag-team">' + safeName + '</span>'
+      : safeName;
+
+    const img = logoUrl
+      ? '<img class="team-logo" src="' + logoUrl + '" alt="' + safeName + ' logo" />'
+      : '<span class="team-logo" style="border-style:dashed;"></span>';
+
+    return '<div class="team-cell">' + img + nameSpan + '</div>';
+  }
+
+  function renderGoalsTable(scoring) {
+    if (!scoring.length) {
+      return '<div class="muted">No goals found in JSON. Adjust <code>extractScoring</code> if needed.</div>';
+    }
+
+    const rows = scoring.map((rec, idx) => {
+      const g = normalizeGoal(rec);
+      const name = getPlayerNameFromTeam(g.jersey, g.team, g.teamId);
+
+      const strength = String(g.strength || "").toUpperCase();
+      let strengthLabel = "";
+      if (strength.includes("PP")) strengthLabel = '<span class="pill pill-pp">PP</span>';
+      else if (strength.includes("SH")) strengthLabel = '<span class="pill pill-sh">SH</span>';
+      else if (strength) strengthLabel = '<span class="pill pill-ev">' + strength + '</span>';
+
+      const teamCell = renderTeamCell(g.team, g.teamLogo, g.teamId);
+      const notes = g.notes ? g.notes : "";
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${g.period || ""}</td>
+          <td>${g.time || ""}</td>
+          <td>${teamCell}</td>
+          <td>${name || ("#" + (g.jersey || "?"))}</td>
+          <td>${g.jersey || ""}</td>
+          <td>${g.a1 ? getPlayerNameFromTeam(g.a1, g.team, g.teamId) + ' <span class="muted">(#' + g.a1 + ')</span>' : '<span class="muted">—</span>'}</td>
+          <td>${g.a2 ? getPlayerNameFromTeam(g.a2, g.team, g.teamId) + ' <span class="muted">(#' + g.a2 + ')</span>' : '<span class="muted">—</span>'}</td>
+          <td>${strengthLabel || '<span class="muted">—</span>'}</td>
+          <td>${notes ? notes : '<span class="muted">—</span>'}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Per</th>
+            <th>Time</th>
+            <th>Team</th>
+            <th>Scorer</th>
+            <th>Jersey</th>
+            <th>Assist 1</th>
+            <th>Assist 2</th>
+            <th>Str</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+      <div class="note">Known team players are highlighted; unknown players fall back to jersey numbers.</div>
+    `;
+  }
+
+  function renderPenaltiesTable(penalties) {
+    if (!penalties.length) {
+      return '<div class="muted">No penalties found in JSON. Adjust <code>extractPenalties</code> if needed.</div>';
+    }
+
+    const rows = penalties.map((rec, idx) => {
+      const p = normalizePenalty(rec);
+      const name = getPlayerNameFromTeam(p.jersey, p.team, p.teamId);
+
+      const teamCell = renderTeamCell(p.team, p.teamLogo, p.teamId);
+
+      const infractionText = p.major || p.penaltyClass === "major"
+        ? `${p.infraction} (Major)`
+        : p.infraction;
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${p.period || ""}</td>
+          <td>${p.time || ""}</td>
+          <td>${teamCell}</td>
+          <td>${name || ("#" + (p.jersey || "?"))}</td>
+          <td>${p.jersey || ""}</td>
+          <td>${p.minutes || ""}</td>
+          <td>${infractionText || ""}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Per</th>
+            <th>Time</th>
+            <th>Team</th>
+            <th>Player</th>
+            <th>Jersey</th>
+            <th>Min</th>
+            <th>Infraction</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // --- Unified Games API: parse & render list at top ---
+
+  // Uses the exact structure you pasted:
+  // { date: [...], visitor: [...], home: [...], details: [...], gameId: [...], location: [...] }
+  function parseUnifiedGames(json) {
+    const dates    = Array.isArray(json.date)     ? json.date     : [];
+    const homeArr  = Array.isArray(json.home)     ? json.home     : [];
+    const visitArr = Array.isArray(json.visitor)  ? json.visitor  : [];
+    const gameIds  = Array.isArray(json.gameId)   ? json.gameId   : [];
+    const locs     = Array.isArray(json.location) ? json.location : [];
+    const details  = Array.isArray(json.details)  ? json.details  : [];
+
+    const n = Math.min(
+      dates.length,
+      homeArr.length,
+      visitArr.length,
+      gameIds.length,
+      locs.length
+    );
+
+    const games = [];
+    const seen = new Set();
+
+    for (let i = 0; i < n; i++) {
+      const id = gameIds[i];
+      if (id == null) continue;
+      const gameId = String(id);
+      if (seen.has(gameId)) continue;
+      seen.add(gameId);
+
+      const dateISO = dates[i];
+      let dateStr = "";
+      let timeStr = "";
+
+      if (dateISO) {
+        const d = new Date(dateISO);
+        if (!isNaN(d.getTime())) {
+          dateStr = d.toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric"
+          });
+          timeStr = d.toLocaleTimeString(undefined, {
+            hour: "numeric",
+            minute: "2-digit"
+          });
+        }
+      }
+
+      const home  = homeArr[i]  || {};
+      const visit = visitArr[i] || {};
+
+      const homeTitle  = home.title  || "Home";
+      const awayTitle  = visit.title || "Visitor";
+      const homeLogo   = home.logo  || "";
+      const awayLogo   = visit.logo || "";
+
+      const location   = locs[i] || "";
+      const detailText = details[i] || ""; // often result or time string
+
+      const dateTimeLabel = [dateStr, timeStr].filter(Boolean).join(" ");
+      const teamsLabel    = `${awayTitle} @ ${homeTitle}`;
+      const mainLabel     = [dateTimeLabel, teamsLabel].filter(Boolean).join(" · ") || `Game ${gameId}`;
+
+      const subBits = [];
+      if (location) subBits.push(location);
+      if (detailText) subBits.push(detailText);
+      const subLabel = subBits.join(" · ");
+
+      games.push({
+        gameId,
+        labelMain: mainLabel,
+        labelSub: subLabel,
+        homeTitle,
+        awayTitle,
+        homeLogo,
+        awayLogo
+      });
+    }
+
+    return games;
+  }
+
+  function renderScheduleList(games) {
+    if (!games.length) {
+      return '<div class="muted">No games found in unified games API response.</div>';
+    }
+
+    const items = games.map(g => {
+      const jsonUrl = GAME_JSON_PREFIX + g.gameId;
+      const sub = g.labelSub
+        ? `<div class="schedule-sub">${g.labelSub}</div>`
+        : "";
+
+      return `
+        <li class="schedule-item">
+          <div class="schedule-meta">
+            <div class="schedule-main">${g.labelMain}</div>
+            ${sub}
+          </div>
+          <button
+            class="schedule-load-btn"
+            data-json-url="${jsonUrl}"
+            title="Load game ${g.gameId}">
+            Load
+          </button>
+        </li>
+      `;
+    }).join("");
+
+    return `<ul class="schedule-list">${items}</ul>`;
+  }
+
+  async function loadSchedule() {
+    const scheduleStatus = document.getElementById("scheduleStatus");
+    const scheduleContainer = document.getElementById("scheduleContainer");
+    const loadScheduleBtn = document.getElementById("loadScheduleBtn");
+
+    scheduleStatus.textContent = "Loading Bemidji unified games…";
+    scheduleStatus.className = "status";
+    loadScheduleBtn.disabled = true;
+    scheduleContainer.innerHTML = '<div class="muted">Fetching games…</div>';
+
+    try {
+      const resp = await fetch(UNIFIED_GAMES_URL);
+      if (!resp.ok) {
+        throw new Error("HTTP " + resp.status + " " + resp.statusText);
+      }
+      const json = await resp.json();
+      const games = parseUnifiedGames(json);
+      scheduleContainer.innerHTML = renderScheduleList(games);
+
+      scheduleStatus.textContent =
+        `Loaded ${games.length} games from unified games API. Click "Load" to view a game.`;
+      scheduleStatus.className = "status success";
+    } catch (err) {
+      console.error(err);
+      scheduleStatus.textContent =
+        "Error loading unified games: " + err.message + " (CORS may block direct requests.)";
+      scheduleStatus.className = "status error";
+      scheduleContainer.innerHTML =
+        '<div class="muted">Unable to load unified games list.</div>';
+    } finally {
+      loadScheduleBtn.disabled = false;
+    }
+  }
+
+  // --- Wire up UI ---
+
+  const urlInput = document.getElementById("urlInput");
+  const loadBtn = document.getElementById("loadBtn");
+  const statusEl = document.getElementById("status");
+  const goalsContainer = document.getElementById("goalsContainer");
+  const penaltiesContainer = document.getElementById("penaltiesContainer");
+  const loadScheduleBtn = document.getElementById("loadScheduleBtn");
+  const scheduleContainer = document.getElementById("scheduleContainer");
+
+  async function loadGame() {
+    const url = urlInput.value.trim();
+    if (!url) {
+      statusEl.textContent = "Please paste a GameSheetStats JSON URL.";
+      statusEl.className = "status error";
+      return;
+    }
+
+    loadBtn.disabled = true;
+    statusEl.textContent = "Loading game data…";
+    statusEl.className = "status";
+
+    goalsContainer.innerHTML = '<div class="muted">Loading goals…</div>';
+    penaltiesContainer.innerHTML = '<div class="muted">Loading penalties…</div>';
+
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        throw new Error("HTTP " + resp.status + " " + resp.statusText);
+      }
+
+      const json = await resp.json();
+
+      const scoring = extractScoring(json);
+      const penalties = extractPenalties(json);
+
+      goalsContainer.innerHTML = renderGoalsTable(scoring);
+      penaltiesContainer.innerHTML = renderPenaltiesTable(penalties);
+
+      statusEl.textContent =
+        "Game data loaded. If tables look off, tweak the key mappings in the script.";
+      statusEl.className = "status success";
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent =
+        "Error loading game: " + err.message + " (CORS may also block direct requests from this page.)";
+      statusEl.className = "status error";
+      goalsContainer.innerHTML = '<div class="muted">No data.</div>';
+      penaltiesContainer.innerHTML = '<div class="muted">No data.</div>';
+    } finally {
+      loadBtn.disabled = false;
+    }
+  }
+
+  loadBtn.addEventListener("click", loadGame);
+  urlInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      loadGame();
+    }
+  });
+
+  loadScheduleBtn.addEventListener("click", loadSchedule);
+
+  // Delegate clicks from schedule list -> load specific game
+  scheduleContainer.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-json-url]");
+    if (!btn) return;
+    const jsonUrl = btn.getAttribute("data-json-url");
+    if (!jsonUrl) return;
+    urlInput.value = jsonUrl;
+    loadGame();
+  });
+</script>
+</body>
+</html>

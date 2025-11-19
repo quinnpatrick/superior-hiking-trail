@@ -714,11 +714,8 @@
       ? '<span class="tag-team">' + safeName + '</span>'
       : safeName;
 
-    const img = logoUrl
-      ? '<img class="team-logo" src="' + logoUrl + '" alt="' + safeName + ' logo" />'
-      : '<span class="team-logo" style="border-style:dashed;"></span>';
-
-    return '<div class="team-cell">' + img + nameSpan + '</div>';
+    
+    return '<div class="team-cell">' + nameSpan + '</div>';
   }
 
   function renderGoalsTable(scoring) {

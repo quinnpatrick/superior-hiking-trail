@@ -451,7 +451,7 @@
   const TEAM_ROSTERS = {
     bemidji: {
       teamIds: [431186,396295], // Bemidji PWB1 Blue
-      nameMatch: ["Bemidji PWB1 Blue","bemidji", "Bemidji PW", "BYHA", "Bemidji"],
+      nameMatch: ["Bemidji PWB1 Blue"],
       players: {
         "25": "Myles Clay",
         "30": "Jeffrey Everhart",
@@ -506,17 +506,43 @@
       }
     },
     
+    redlakefalls: {
+      teamIds: [396292],
+      nameMatch: ["Red Lake Falls PWB1", "red lake falls", "rlf"],
+      players: { }
+    },
     crookston: {
-      teamIds: [396315],
-      nameMatch: ["East Grand Forks PWB1", "east grand forks", "egf"],
+      teamIds: [396347],
+      nameMatch: ["crookston", "Crookston PWB1"],
       players: { }
     },
     
     bagley: {
-      teamIds: [396315],
-      nameMatch: ["East Grand Forks PWB1", "east grand forks", "egf"],
+      teamIds: [396294],
+      nameMatch: ["bagley", "Bagley PWB1"],
       players: { }
-    }
+    },
+
+    trf: {
+          teamIds: [396296],
+          nameMatch: ["thief river falls", "trf", "Thief River Falls PWB1"],
+          players:   {
+      "2":  "Brayden Muetzel",
+      "4":  "Aiden Bourne",
+      "5":  "Liam Hartig",
+      "6":  "Iver Bertilrud",
+      "7":  "Connor Esala",
+      "8":  "Brydin Marsden",
+      "9":  "Maverick Kachena",
+      "10": "Tanner Marcotte",
+      "11": "Jager Adam",
+      "12": "Brycen Tureson",
+      "30": "Bryson Harbott"
+    } 
+}
+
+  
+
 
     
   };
@@ -1095,8 +1121,14 @@
 
     const rows = penalties.map((rec, idx) => {
       const p = normalizePenalty(rec);
-      let name = getPlayerNameFromTeam(p.jersey, p.team, p.teamId);
-      if (name && name.startsWith('#') && p.committedTitle) name = p.committedTitle;
+      let nameCommitted = getPlayerNameFromTeam(p.jersey, p.team, p.teamId) || (p.committedTitle || ('#' + (p.jersey || '?')));
+      if (nameCommitted && nameCommitted.startsWith('#') && p.committedTitle) nameCommitted = p.committedTitle;
+      const servedJersey = p.servedJersey || p.servedBy?.number || '';
+      let servedName = '';
+      if (servedJersey && String(servedJersey) !== String(p.jersey)) {
+        servedName = getPlayerNameFromTeam(servedJersey, p.team, p.teamId) || p.servedTitle || ('#' + String(servedJersey));
+      }
+      const name = servedName ? (nameCommitted + '<div class="muted small">Served by: ' + servedName + '</div>') : nameCommitted;
 
       const teamCell = renderTeamCell(p.team, p.teamLogo, p.teamId);
 
@@ -1333,7 +1365,12 @@
       const arr = penalties.filter(p => canonicalPeriodKey(p.period || p.periodLabel) === periodKey);
       if (!arr.length) return '<div class="muted">No penalties</div>';
       const rows = arr.map(p => {
-        const who = getPlayerNameFromTeam(p.jersey, p.team, p.teamId) || (p.committedTitle || ('#' + (p.jersey || '?')));
+        const committedName = getPlayerNameFromTeam(p.jersey, p.team, p.teamId) || (p.committedTitle || ('#' + (p.jersey || '?')));
+        const servedJersey = p.servedJersey || p.servedBy?.number || '';
+        const servedName = servedJersey && String(servedJersey) !== String(p.jersey)
+          ? (getPlayerNameFromTeam(servedJersey, p.team, p.teamId) || p.servedTitle || ('#' + String(servedJersey)))
+          : null;
+        const who = servedName ? (committedName + '<div class="muted small">Served by: ' + servedName + '</div>') : committedName;
         const teamCell = renderTeamCell(p.team, p.teamLogo, p.teamId);
         return `<tr><td>${p.time || ''}</td><td>${teamCell}</td><td>${who}</td><td>${p.minutes || ''}</td><td>${p.infraction || ''}</td></tr>`;
       });
@@ -1349,17 +1386,75 @@
     }
 
     function renderShotsFor(periodKey) {
+      // Calculate running totals up to and including this period
+      const periodOrder = desired;
+      let homeTotal = 0, visitorTotal = 0;
+      for (const pk of periodOrder) {
+        if (canonicalPeriodKey(pk) === canonicalPeriodKey(periodKey)) break;
+        const rec = shotsMap[pk] || { home: 0, visitor: 0 };
+        homeTotal += Number(rec.home) || 0;
+        visitorTotal += Number(rec.visitor) || 0;
+      }
+      // Add current period
       const rec = shotsMap[periodKey] || { home: '', visitor: '' };
-      const homeGoalie = getGoalieName('home', json) || '<span class="muted">—</span>';
-      const awayGoalie = getGoalieName('visitor', json) || '<span class="muted">—</span>';
+      homeTotal += Number(rec.home) || 0;
+      visitorTotal += Number(rec.visitor) || 0;
       return `
         <table>
           <thead>
-            <tr><th>Team</th><th>SOG</th><th>Goalie</th></tr>
+            <tr><th>Team</th><th>SOG</th><th>Game Total</th></tr>
           </thead>
           <tbody>
-            <tr><td>${json.home?.title || 'Home'}</td><td>${rec.home || '<span class="muted">—</span>'}</td><td>${homeGoalie}</td></tr>
-            <tr><td>${json.visitor?.title || json.away?.title || 'Away'}</td><td>${rec.visitor || '<span class="muted">—</span>'}</td><td>${awayGoalie}</td></tr>
+            <tr><td>${json.home?.title || 'Home'}</td><td>${rec.home || '<span class=\"muted\">—</span>'}</td><td>${homeTotal}</td></tr>
+            <tr><td>${json.visitor?.title || json.away?.title || 'Away'}</td><td>${rec.visitor || '<span class=\"muted\">—</span>'}</td><td>${visitorTotal}</td></tr>
+          </tbody>
+        </table>`;
+    }
+
+    // Helper to get goalie info for a side and period
+    function getGoalieInfoForPeriod(side, periodKey) {
+      const tblKey = side === 'home' ? 'goalieInfoHome' : 'goalieInfoVisitor';
+      const info = json.tables && json.tables[tblKey];
+      if (!info) return [];
+      const titles = info.title || [];
+      const ids = info.id || [];
+      const tois = info.tois || [];
+      const ons = info.ons || [];
+      const offs = info.offs || [];
+      // Map on/off by goalie index
+      return titles.map((title, idx) => {
+        // Find on/off for this goalie in this period
+        let onTime = '', offTime = '';
+        if (ons && ons[idx] && canonicalPeriodKey(ons[idx].period) === periodKey) onTime = ons[idx].time;
+        if (offs && offs[idx] && canonicalPeriodKey(offs[idx].period) === periodKey) offTime = offs[idx].time;
+        return {
+          name: title,
+          id: ids[idx] || '',
+          toi: tois[idx] || '',
+          on: onTime,
+          off: offTime
+        };
+      });
+    }
+
+    function renderGoaliesFor(periodKey) {
+      const homeGoalies = getGoalieInfoForPeriod('home', periodKey).filter(g => g.on || g.off);
+      const visitorGoalies = getGoalieInfoForPeriod('visitor', periodKey).filter(g => g.on || g.off);
+      if (!homeGoalies.length && !visitorGoalies.length) return '<div class="muted">No goalie changes</div>';
+      let rows = '';
+      homeGoalies.forEach(g => {
+        rows += `<tr><td>${json.home?.title || 'Home'}</td><td>${g.name}</td><td>${g.on || '<span class=\"muted\">—</span>'}</td><td>${g.off || '<span class=\"muted\">—</span>'}</td><td>${g.toi || '<span class=\"muted\">—</span>'}</td></tr>`;
+      });
+      visitorGoalies.forEach(g => {
+        rows += `<tr><td>${json.visitor?.title || json.away?.title || 'Away'}</td><td>${g.name}</td><td>${g.on || '<span class=\"muted\">—</span>'}</td><td>${g.off || '<span class=\"muted\">—</span>'}</td><td>${g.toi || '<span class=\"muted\">—</span>'}</td></tr>`;
+      });
+      return `
+        <table>
+          <thead>
+            <tr><th>Team</th><th>Goalie</th><th>On</th><th>Off</th><th>TOI</th></tr>
+          </thead>
+          <tbody>
+            ${rows}
           </tbody>
         </table>`;
     }
@@ -1373,7 +1468,8 @@
           <div style="padding:12px;">
             <div style="margin-bottom:10px;"><strong>Goals</strong>${renderGoalRowsFor(pk)}</div>
             <div style="margin-bottom:10px;"><strong>Penalties</strong>${renderPenRowsFor(pk)}</div>
-            <div><strong>Shots on Goal</strong>${renderShotsFor(pk)}</div>
+            <div style="margin-bottom:10px;"><strong>Shots on Goal</strong>${renderShotsFor(pk)}</div>
+            <div><strong>Goalies</strong>${renderGoaliesFor(pk)}</div>
           </div>
         </div>
       `;

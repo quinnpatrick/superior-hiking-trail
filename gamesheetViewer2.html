@@ -450,6 +450,91 @@
     }
   };
 
+  // Per-game roster overrides parsed from the loaded JSON.
+  // Keys can be team id (string) or team name (lowercased).
+  let GAME_ROSTERS = {};
+
+  function buildGameRosters(json) {
+    GAME_ROSTERS = {};
+
+    function extractMapFromPlayers(players) {
+      const map = {};
+      if (!players) return map;
+
+      // normalize array or object
+      let arr = players;
+      if (!Array.isArray(arr) && typeof arr === 'object') {
+        // if object with numeric keys, take values
+        const keys = Object.keys(arr);
+        if (keys.length && typeof arr[keys[0]] === 'object') {
+          arr = keys.map(k => arr[k]);
+        } else {
+          arr = [];
+        }
+      }
+
+      if (!Array.isArray(arr)) return map;
+
+      arr.forEach(p => {
+        if (!p || typeof p !== 'object') return;
+        const num = p.number ?? p.jersey ?? p.playerNumber ?? p.sweater ?? p.sweaterNumber ?? '';
+        const name = (p.firstName || p.first) && (p.lastName || p.last)
+          ? String((p.firstName || p.first) + ' ' + (p.lastName || p.last)).trim()
+          : (p.title || p.name || p.playerName || '');
+        if (num != null && String(num).trim() !== '') {
+          map[String(num)] = String(name || '').trim();
+        }
+      });
+
+      return map;
+    }
+
+    // try home/visitor/away locations
+    const home = json.home || json.homeTeam || (json.game && json.game.home) || null;
+    const visitor = json.visitor || json.away || json.awayTeam || (json.game && json.game.visitor) || null;
+
+    if (home && home.roster) {
+      const m = extractMapFromPlayers(home.roster.players || home.roster.player || home.roster);
+      if (Object.keys(m).length) {
+        if (home.id != null) GAME_ROSTERS[String(home.id)] = m;
+        if (home.title) GAME_ROSTERS[String(home.title).toLowerCase()] = m;
+      }
+    }
+
+    if (visitor && visitor.roster) {
+      const m = extractMapFromPlayers(visitor.roster.players || visitor.roster.player || visitor.roster);
+      if (Object.keys(m).length) {
+        if (visitor.id != null) GAME_ROSTERS[String(visitor.id)] = m;
+        if (visitor.title) GAME_ROSTERS[String(visitor.title).toLowerCase()] = m;
+      }
+    }
+
+    // some payloads include rosters at top-level
+    if (json.roster || json.rosters) {
+      const r = json.roster || json.rosters;
+      if (Array.isArray(r)) {
+        r.forEach(block => {
+          const m = extractMapFromPlayers(block.players || block.player || block);
+          if (Object.keys(m).length) {
+            if (block.id != null) GAME_ROSTERS[String(block.id)] = m;
+            if (block.title) GAME_ROSTERS[String(block.title).toLowerCase()] = m;
+          }
+        });
+      } else if (typeof r === 'object') {
+        Object.keys(r).forEach(k => {
+          const block = r[k];
+          const m = extractMapFromPlayers(block.players || block.player || block);
+          if (Object.keys(m).length) {
+            if (block.id != null) GAME_ROSTERS[String(block.id)] = m;
+            if (block.title) GAME_ROSTERS[String(block.title).toLowerCase()] = m;
+            if (String(k).trim()) GAME_ROSTERS[String(k).toLowerCase()] = m;
+          }
+        });
+      }
+    }
+
+  }
+
   function findTeamKey(teamName, teamId) {
     const idStr = teamId != null ? String(teamId) : null;
     const name = teamName ? String(teamName).toLowerCase() : "";
@@ -480,12 +565,36 @@
     if (!jersey) return "";
     const j = String(jersey);
 
+        // 2) configured TEAM_ROSTERS override
     const teamKey = findTeamKey(teamName, teamId);
-    if (!teamKey) return "#" + j;
+    if (teamKey) {
+      const roster = TEAM_ROSTERS[teamKey].players || {};
+      if (roster[j]) return roster[j];
+    }
 
-    const roster = TEAM_ROSTERS[teamKey].players || {};
-    return roster[j] || "#" + j;
+    // 1) per-game roster (from JSON)
+    if (GAME_ROSTERS) {
+      if (teamId != null && GAME_ROSTERS.hasOwnProperty(String(teamId))) {
+        const map = GAME_ROSTERS[String(teamId)];
+        if (map && map[j]) return toTitleSimple(map[j]);
+      }
+      if (teamName) {
+        const key = String(teamName).toLowerCase();
+        if (GAME_ROSTERS.hasOwnProperty(key)) {
+          const map = GAME_ROSTERS[key];
+          if (map && map[j]) return toTitleSimple(map[j]);
+        }
+      }
+    }
+    // fallback to jersey placeholder
+    return "#" + j;
   }
+
+
+  function toTitleSimple(s) {
+  return String(s).toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
 
   function isKnownTeam(teamName, teamId) {
     return !!findTeamKey(teamName, teamId);
@@ -581,7 +690,10 @@
               rec.assist_2_sweater ??
               "",
       strength: rec.strength ?? rec.situation ?? rec.play_type ?? "",
-      notes:    rec.notes ?? rec.description ?? rec.detail ?? rec.note ?? ""
+      notes:    rec.notes ?? rec.description ?? rec.detail ?? rec.note ?? "",
+      scorerTitle: rec.goalScorer?.title ?? rec.goalScorerTitle ?? rec.scorer ?? rec.scorerName ?? rec.playerTitle ?? "",
+      a1Title: rec.assist1By?.title ?? rec.assist1Title ?? rec.assist1Name ?? "",
+      a2Title: rec.assist2By?.title ?? rec.assist2Title ?? rec.assist2Name ?? ""
     };
   }
 
@@ -718,6 +830,9 @@
                     "",
       penaltyClass: rec.penaltyClass ?? "",
       major:        !!rec.major
+      ,
+      committedTitle: rec.commitedBy?.title ?? rec.commitedByTitle ?? rec.playerTitle ?? "",
+      servedTitle: rec.servedBy?.title ?? rec.servedByTitle ?? ""
     };
   }
 
@@ -842,7 +957,10 @@
 
     const rows = scoring.map((rec, idx) => {
       const g = normalizeGoal(rec);
-      const name = getPlayerNameFromTeam(g.jersey, g.team, g.teamId);
+
+      // prefer game-roster name, then TEAM_ROSTERS override, else fall back to event title if available
+      let name = getPlayerNameFromTeam(g.jersey, g.team, g.teamId);
+      if (name && name.startsWith('#') && g.scorerTitle) name = g.scorerTitle;
 
       const strength = String(g.strength || "").toUpperCase();
       let strengthLabel = "";
@@ -853,6 +971,9 @@
       const teamCell = renderTeamCell(g.team, g.teamLogo, g.teamId);
       const notes = g.notes ? g.notes : "";
 
+      const assist1 = g.a1 ? (getPlayerNameFromTeam(g.a1, g.team, g.teamId) + ' <span class="muted">(#' + g.a1 + ')</span>') : (g.a1Title ? (g.a1Title + ' <span class="muted">(#' + (g.a1 || '?') + ')</span>') : '<span class="muted">—</span>');
+      const assist2 = g.a2 ? (getPlayerNameFromTeam(g.a2, g.team, g.teamId) + ' <span class="muted">(#' + g.a2 + ')</span>') : (g.a2Title ? (g.a2Title + ' <span class="muted">(#' + (g.a2 || '?') + ')</span>') : '<span class="muted">—</span>');
+
       return `
         <tr>
           <td>${idx + 1}</td>
@@ -861,8 +982,8 @@
           <td>${teamCell}</td>
           <td>${name || ("#" + (g.jersey || "?"))}</td>
           <td>${g.jersey || ""}</td>
-          <td>${g.a1 ? getPlayerNameFromTeam(g.a1, g.team, g.teamId) + ' <span class="muted">(#' + g.a1 + ')</span>' : '<span class="muted">—</span>'}</td>
-          <td>${g.a2 ? getPlayerNameFromTeam(g.a2, g.team, g.teamId) + ' <span class="muted">(#' + g.a2 + ')</span>' : '<span class="muted">—</span>'}</td>
+          <td>${assist1}</td>
+          <td>${assist2}</td>
           <td>${strengthLabel || '<span class="muted">—</span>'}</td>
           <td>${notes ? notes : '<span class="muted">—</span>'}</td>
         </tr>
@@ -900,7 +1021,8 @@
 
     const rows = penalties.map((rec, idx) => {
       const p = normalizePenalty(rec);
-      const name = getPlayerNameFromTeam(p.jersey, p.team, p.teamId);
+      let name = getPlayerNameFromTeam(p.jersey, p.team, p.teamId);
+      if (name && name.startsWith('#') && p.committedTitle) name = p.committedTitle;
 
       const teamCell = renderTeamCell(p.team, p.teamLogo, p.teamId);
 
@@ -1216,9 +1338,11 @@
         throw new Error("HTTP " + resp.status + " " + resp.statusText);
       }
 
-      const json = await resp.json();
+  const json = await resp.json();
+  // build per-game roster map from JSON (home/visitor rosters)
+  try { buildGameRosters(json); } catch (e) { console.warn('buildGameRosters failed', e); }
 
-      const scoring = extractScoring(json);
+  const scoring = extractScoring(json);
       const penalties = extractPenalties(json);
       const shootoutEntries = extractShootout(json);
       const shotsSummary = extractShots(json);

@@ -325,10 +325,16 @@
         Bemidji Schedule
         <span class="chip">Unified Games API</span>
       </div>
-      <button id="loadScheduleBtn">
-        <span class="icon">📋</span>
-        Load Schedule
-      </button>
+      <div style="display:flex;gap:8px;">
+        <button id="loadRegularBtn">
+          <span class="icon">📋</span>
+          Load Regular Season
+        </button>
+        <button id="loadExhibitBtn">
+          <span class="icon">📋</span>
+          Load Exhibition Season
+        </button>
+      </div>
     </div>
     <div id="scheduleStatus" class="status"></div>
     <div id="scheduleContainer" class="muted">
@@ -431,6 +437,11 @@
   // --- Config ---
 
   const UNIFIED_GAMES_URL =
+    "https://gamesheetstats.com/api/useUnifiedGames/11180?filter[gametype]=overall&filter[limit]=100&filter[offset]=0&filter[teams]=396295&filter[timeZoneOffset]=-";
+
+  // Two unified-games endpoints: regular season and exhibition season
+  const UNIFIED_GAMES_URL_REGULAR = UNIFIED_GAMES_URL;
+  const UNIFIED_GAMES_URL_EXHIBITION =
     "https://gamesheetstats.com/api/useUnifiedGames/10857?filter[gametype]=overall&filter[limit]=100&filter[offset]=0&filter[teams]=431186&filter[timeZoneOffset]=-";
 
   const GAME_JSON_PREFIX =
@@ -439,8 +450,8 @@
   // --- Multi-team roster mapping (jersey -> player name) ---
   const TEAM_ROSTERS = {
     bemidji: {
-      teamIds: [431186], // Bemidji PWB1 Blue
-      nameMatch: ["bemidji", "Bemidji PW", "BYHA", "Bemidji"],
+      teamIds: [431186,396295], // Bemidji PWB1 Blue
+      nameMatch: ["Bemidji PWB1 Blue","bemidji", "Bemidji PW", "BYHA", "Bemidji"],
       players: {
         "25": "Myles Clay",
         "30": "Jeffrey Everhart",
@@ -459,8 +470,61 @@
         "24": "Joey Van Vynckt",
         "41": "Grant Williams"
       }
+    },
+    warroad: {
+      teamIds: [396293],
+      nameMatch: ["Warroad PWB1", "warroad"],
+      players: {
+        "14": "Max Allen",
+        "5":  "Ivan Bendickson",
+        "31": "Brylee Canfield",
+        "32": "Davin Curtis",
+        "20": "Grady Dougherty",
+        "13": "Greyson Earhart",
+        "33": "Jean-Paul Harren",
+        "25": "Alexander Illg",
+        "6":  "Wyatt Lund",
+        "1":  "Cooper Manka",
+        "23": "Hudson Pahlen",
+        "19": "Noah Russell",
+        "27": "Brody Schuette",
+        "2":  "Griffin Steinbring",
+        "26": "Bryson Thorson"
+      }
+    },
+    egf: {
+      teamIds: [396315],
+      nameMatch: ["East Grand Forks PWB1", "east grand forks", "egf"],
+      players: { }
+    },
+
+    roseau: {
+      teamIds: [396316],
+      nameMatch: ["Roseau PWB1", "roseau"],
+      players: { 
+
+      }
+    },
+    
+    crookston: {
+      teamIds: [396315],
+      nameMatch: ["East Grand Forks PWB1", "east grand forks", "egf"],
+      players: { }
+    },
+    
+    bagley: {
+      teamIds: [396315],
+      nameMatch: ["East Grand Forks PWB1", "east grand forks", "egf"],
+      players: { }
     }
+
+    
   };
+
+
+  
+
+
 
   // Per-game roster overrides parsed from the loaded JSON.
   // Keys can be team id (string) or team name (lowercased).
@@ -1428,18 +1492,22 @@
     return `<ul class="schedule-list">${items}</ul>`;
   }
 
-  async function loadSchedule() {
+  async function loadSchedule(urlOverride) {
     const scheduleStatus = document.getElementById("scheduleStatus");
     const scheduleContainer = document.getElementById("scheduleContainer");
-    const loadScheduleBtn = document.getElementById("loadScheduleBtn");
+    const btnRegular = document.getElementById("loadRegularBtn");
+    const btnExhibit = document.getElementById("loadExhibitBtn");
+
+    const urlToUse = urlOverride || UNIFIED_GAMES_URL;
 
     scheduleStatus.textContent = "Loading Bemidji unified games…";
     scheduleStatus.className = "status";
-    loadScheduleBtn.disabled = true;
+    if (btnRegular) btnRegular.disabled = true;
+    if (btnExhibit) btnExhibit.disabled = true;
     scheduleContainer.innerHTML = '<div class="muted">Fetching games…</div>';
 
     try {
-      const resp = await fetch(UNIFIED_GAMES_URL);
+      const resp = await fetch(urlToUse);
       if (!resp.ok) {
         throw new Error("HTTP " + resp.status + " " + resp.statusText);
       }
@@ -1458,7 +1526,8 @@
       scheduleContainer.innerHTML =
         '<div class="muted">Unable to load unified games list.</div>';
     } finally {
-      loadScheduleBtn.disabled = false;
+      if (btnRegular) btnRegular.disabled = false;
+      if (btnExhibit) btnExhibit.disabled = false;
     }
   }
 
@@ -1471,7 +1540,8 @@
   const penaltiesContainer = document.getElementById("penaltiesContainer");
   const shootoutContainer = document.getElementById("shootoutContainer");
   const shotsContainer = document.getElementById("shotsContainer");
-  const loadScheduleBtn = document.getElementById("loadScheduleBtn");
+  const loadRegularBtn = document.getElementById("loadRegularBtn");
+  const loadExhibitBtn = document.getElementById("loadExhibitBtn");
   const scheduleContainer = document.getElementById("scheduleContainer");
 
   async function loadGame() {
@@ -1544,7 +1614,8 @@
     }
   });
 
-  loadScheduleBtn.addEventListener("click", loadSchedule);
+  if (loadRegularBtn) loadRegularBtn.addEventListener("click", () => loadSchedule(UNIFIED_GAMES_URL_REGULAR));
+  if (loadExhibitBtn) loadExhibitBtn.addEventListener("click", () => loadSchedule(UNIFIED_GAMES_URL_EXHIBITION));
 
   scheduleContainer.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-json-url]");

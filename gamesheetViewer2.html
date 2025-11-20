@@ -364,6 +364,17 @@
     <div id="status" class="status"></div>
   </div>
 
+  <!-- Per-period summary -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        By Period
+        <span class="chip">Period Summary</span>
+      </div>
+    </div>
+    <div id="periodsContainer" class="muted">No game loaded yet. Load a game to see per-period summaries.</div>
+  </div>
+
   <!-- Goals & Penalties -->
   <div class="grid">
     <div class="card">
@@ -1159,6 +1170,157 @@
     `;
   }
 
+  // --- Per-period summary renderer ---
+
+  function canonicalPeriodKey(label) {
+    if (!label && label !== 0) return "";
+    let s = String(label).toUpperCase();
+    s = s.replace(/\s+/g, "");
+    s = s.replace(/ST|ND|RD|TH|PERIOD/g, "");
+    // normalize 'OT 1' or 'OT1' to 'OT1'
+    s = s.replace(/OT[^0-9]*(\d+)/, 'OT$1');
+    return s;
+  }
+
+  function getGoalieName(side, json) {
+    // side: 'home' or 'visitor'
+    try {
+      const tblKey = side === 'home' ? 'goalieInfoHome' : 'goalieInfoVisitor';
+      const tbl = json.tables && json.tables[tblKey];
+      if (tbl && Array.isArray(tbl.title) && tbl.title.length) {
+        const first = tbl.title[0] || '';
+        const parsed = parseHashName(first);
+        return parsed.name || first;
+      }
+
+      // fallback to roster goalies
+      const teamBlock = side === 'home' ? (json.home || {}) : (json.visitor || json.away || {});
+      const goalies = teamBlock.roster && teamBlock.roster.goalies ? teamBlock.roster.goalies : (teamBlock.goalies || []);
+      if (Array.isArray(goalies) && goalies.length) {
+        // prefer starting goalie
+        const starter = goalies.find(g => g.starting) || goalies[0];
+        if (starter) {
+          const name = (starter.firstName || starter.first) ? ((starter.firstName || starter.first) + ' ' + (starter.lastName || starter.last)).trim() : (starter.title || '');
+          if (name) return name;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return '';
+  }
+
+  function renderPeriodsByPeriod(json) {
+    const scoring = extractScoring(json).map(normalizeGoal);
+    const penalties = extractPenalties(json).map(normalizePenalty);
+    const shots = extractShots(json);
+
+    // gather period labels in preferred order: 1,2,3,OT1.. fallback to found labels
+    const desired = [];
+    // prefer canonical numeric order
+    ['1','2','3'].forEach(n => { if (scoring.some(g => canonicalPeriodKey(g.period||g.periodLabel) === n) || penalties.some(p => canonicalPeriodKey(p.period||p.periodLabel) === n) || (shots && Array.isArray(shots.periods) && shots.periods.some(s=> canonicalPeriodKey(s.period||'')===n))) desired.push(n); });
+    // add overtime periods found
+    const otKeys = new Set();
+    scoring.forEach(g => { const c = canonicalPeriodKey(g.period||g.periodLabel); if (c && c.startsWith('OT')) otKeys.add(c); });
+    penalties.forEach(p => { const c = canonicalPeriodKey(p.period||p.periodLabel); if (c && c.startsWith('OT')) otKeys.add(c); });
+    if (shots && Array.isArray(shots.periods)) shots.periods.forEach(s => { const c = canonicalPeriodKey(s.period||''); if (c && c.startsWith('OT')) otKeys.add(c); });
+    Array.from(otKeys).sort().forEach(k => desired.push(k));
+
+    // fallback: any other found canonical keys
+    const others = new Set();
+    scoring.forEach(g => others.add(canonicalPeriodKey(g.period||g.periodLabel)));
+    penalties.forEach(p => others.add(canonicalPeriodKey(p.period||p.periodLabel)));
+    if (shots && Array.isArray(shots.periods)) shots.periods.forEach(s => others.add(canonicalPeriodKey(s.period||'')));
+    Array.from(others).forEach(k => { if (k && !desired.includes(k)) desired.push(k); });
+
+    // build shots map by canonical key
+    const shotsMap = {};
+    if (shots && Array.isArray(shots.periods)) {
+      shots.periods.forEach(p => {
+        const key = canonicalPeriodKey(p.period || p.periodLabel || '');
+        shotsMap[key] = { visitor: p.visitor ?? p["visitor"] ?? '', home: p.home ?? p["home"] ?? '' };
+      });
+    }
+
+    const homeId = json.home?.id ?? null;
+    const visitId = json.visitor?.id ?? json.away?.id ?? null;
+
+    function renderGoalRowsFor(periodKey) {
+      const arr = scoring.filter(g => canonicalPeriodKey(g.period || g.periodLabel) === periodKey);
+      if (!arr.length) return '<div class="muted">No goals</div>';
+      const rows = arr.map(g => {
+        const scorer = getPlayerNameFromTeam(g.jersey, g.team, g.teamId) || (g.scorerTitle || ('#' + (g.jersey || '?')));
+        const a1 = g.a1 ? (getPlayerNameFromTeam(g.a1, g.team, g.teamId) + ' (#' + g.a1 + ')') : (g.a1Title || '—');
+        const a2 = g.a2 ? (getPlayerNameFromTeam(g.a2, g.team, g.teamId) + ' (#' + g.a2 + ')') : (g.a2Title || '—');
+        const teamCell = renderTeamCell(g.team, g.teamLogo, g.teamId);
+        const strength = g.strength ? ('<span class="pill">' + g.strength + '</span>') : '';
+        const notes = g.notes || '';
+        return `<tr><td>${g.time || ''}</td><td>${teamCell}</td><td>${scorer}</td><td>${g.jersey || ''}</td><td>${a1}</td><td>${a2}</td><td>${strength}</td><td>${notes || ''}</td></tr>`;
+      });
+      return `
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Team</th><th>Scorer</th><th>#</th><th>Assist 1</th><th>Assist 2</th><th>Str</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            ${rows.join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function renderPenRowsFor(periodKey) {
+      const arr = penalties.filter(p => canonicalPeriodKey(p.period || p.periodLabel) === periodKey);
+      if (!arr.length) return '<div class="muted">No penalties</div>';
+      const rows = arr.map(p => {
+        const who = getPlayerNameFromTeam(p.jersey, p.team, p.teamId) || (p.committedTitle || ('#' + (p.jersey || '?')));
+        const teamCell = renderTeamCell(p.team, p.teamLogo, p.teamId);
+        return `<tr><td>${p.time || ''}</td><td>${teamCell}</td><td>${who}</td><td>${p.jersey || ''}</td><td>${p.minutes || ''}</td><td>${p.infraction || ''}</td></tr>`;
+      });
+      return `
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Team</th><th>Player</th><th>#</th><th>Min</th><th>Infraction</th></tr>
+          </thead>
+          <tbody>
+            ${rows.join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function renderShotsFor(periodKey) {
+      const rec = shotsMap[periodKey] || { home: '', visitor: '' };
+      const homeGoalie = getGoalieName('home', json) || '<span class="muted">—</span>';
+      const awayGoalie = getGoalieName('visitor', json) || '<span class="muted">—</span>';
+      return `
+        <table>
+          <thead>
+            <tr><th>Team</th><th>SOG</th><th>Goalie</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>${json.home?.title || 'Home'}</td><td>${rec.home || '<span class="muted">—</span>'}</td><td>${homeGoalie}</td></tr>
+            <tr><td>${json.visitor?.title || json.away?.title || 'Away'}</td><td>${rec.visitor || '<span class="muted">—</span>'}</td><td>${awayGoalie}</td></tr>
+          </tbody>
+        </table>`;
+    }
+
+    // Build grouped HTML for each desired period
+    const groups = desired.map(pk => {
+      const label = pk.startsWith('OT') ? pk.replace('OT', 'OT ') : (pk.match(/^\d+$/) ? ('Period ' + pk) : pk);
+      return `
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-header"><div class="card-title">${label}</div></div>
+          <div style="padding:12px;">
+            <div style="margin-bottom:10px;"><strong>Goals</strong>${renderGoalRowsFor(pk)}</div>
+            <div style="margin-bottom:10px;"><strong>Penalties</strong>${renderPenRowsFor(pk)}</div>
+            <div><strong>Shots on Goal</strong>${renderShotsFor(pk)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return groups || '<div class="muted">No period data found.</div>';
+  }
+
   // --- Unified Games API: parse & render list at top ---
 
   function parseUnifiedGames(json) {
@@ -1346,6 +1508,14 @@
       const penalties = extractPenalties(json);
       const shootoutEntries = extractShootout(json);
       const shotsSummary = extractShots(json);
+
+      // render per-period summary card
+      try {
+        const pc = document.getElementById('periodsContainer');
+        if (pc) pc.innerHTML = renderPeriodsByPeriod(json);
+      } catch (e) {
+        console.warn('renderPeriodsByPeriod failed', e);
+      }
 
       goalsContainer.innerHTML = renderGoalsTable(scoring);
       penaltiesContainer.innerHTML = renderPenaltiesTable(penalties);

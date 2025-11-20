@@ -581,20 +581,20 @@
     const teamKey = findTeamKey(teamName, teamId);
     if (teamKey) {
       const roster = TEAM_ROSTERS[teamKey].players || {};
-      if (roster[j]) return roster[j];
+      if (roster[j]) return roster[j] + " (#" + j + ")";
     }
 
     // 1) per-game roster (from JSON)
     if (GAME_ROSTERS) {
       if (teamId != null && GAME_ROSTERS.hasOwnProperty(String(teamId))) {
         const map = GAME_ROSTERS[String(teamId)];
-        if (map && map[j]) return toTitleSimple(map[j]);
+        if (map && map[j]) return toTitleSimple(map[j]) + " (#" + j + ")";
       }
       if (teamName) {
         const key = String(teamName).toLowerCase();
         if (GAME_ROSTERS.hasOwnProperty(key)) {
           const map = GAME_ROSTERS[key];
-          if (map && map[j]) return toTitleSimple(map[j]);
+          if (map && map[j]) return toTitleSimple(map[j]) + " (#" + j + ")";
         }
       }
     }
@@ -983,8 +983,8 @@
       const teamCell = renderTeamCell(g.team, g.teamLogo, g.teamId);
       const notes = g.notes ? g.notes : "";
 
-      const assist1 = g.a1 ? (getPlayerNameFromTeam(g.a1, g.team, g.teamId) + ' <span class="muted">(#' + g.a1 + ')</span>') : (g.a1Title ? (g.a1Title + ' <span class="muted">(#' + (g.a1 || '?') + ')</span>') : '<span class="muted">—</span>');
-      const assist2 = g.a2 ? (getPlayerNameFromTeam(g.a2, g.team, g.teamId) + ' <span class="muted">(#' + g.a2 + ')</span>') : (g.a2Title ? (g.a2Title + ' <span class="muted">(#' + (g.a2 || '?') + ')</span>') : '<span class="muted">—</span>');
+      const assist1 = g.a1 ? (getPlayerNameFromTeam(g.a1, g.team, g.teamId)) : (g.a1Title ? (g.a1Title) : '<span class="muted">—</span>');
+      const assist2 = g.a2 ? (getPlayerNameFromTeam(g.a2, g.team, g.teamId)) : (g.a2Title ? (g.a2Title) : '<span class="muted">—</span>');
 
       return `
         <tr>
@@ -992,8 +992,7 @@
           <td>${g.period || ""}</td>
           <td>${g.time || ""}</td>
           <td>${teamCell}</td>
-          <td>${name || ("#" + (g.jersey || "?"))}</td>
-          <td>${g.jersey || ""}</td>
+          <td>${name}</td>
           <td>${assist1}</td>
           <td>${assist2}</td>
           <td>${strengthLabel || '<span class="muted">—</span>'}</td>
@@ -1011,7 +1010,6 @@
             <th>Time</th>
             <th>Team</th>
             <th>Scorer</th>
-            <th>Jersey</th>
             <th>Assist 1</th>
             <th>Assist 2</th>
             <th>Str</th>
@@ -1048,8 +1046,7 @@
           <td>${p.period || ""}</td>
           <td>${p.time || ""}</td>
           <td>${teamCell}</td>
-          <td>${name || ("#" + (p.jersey || "?"))}</td>
-          <td>${p.jersey || ""}</td>
+          <td>${name}</td>
           <td>${p.minutes || ""}</td>
           <td>${infractionText || ""}</td>
         </tr>
@@ -1065,7 +1062,6 @@
             <th>Time</th>
             <th>Team</th>
             <th>Player</th>
-            <th>Jersey</th>
             <th>Min</th>
             <th>Infraction</th>
           </tr>
@@ -1250,18 +1246,18 @@
       const arr = scoring.filter(g => canonicalPeriodKey(g.period || g.periodLabel) === periodKey);
       if (!arr.length) return '<div class="muted">No goals</div>';
       const rows = arr.map(g => {
-        const scorer = getPlayerNameFromTeam(g.jersey, g.team, g.teamId) || (g.scorerTitle || ('#' + (g.jersey || '?')));
-        const a1 = g.a1 ? (getPlayerNameFromTeam(g.a1, g.team, g.teamId) + ' (#' + g.a1 + ')') : (g.a1Title || '—');
-        const a2 = g.a2 ? (getPlayerNameFromTeam(g.a2, g.team, g.teamId) + ' (#' + g.a2 + ')') : (g.a2Title || '—');
+        const scorer = getPlayerNameFromTeam(g.jersey, g.team, g.teamId) ;
+        const a1 = g.a1 ? getPlayerNameFromTeam(g.a1, g.team, g.teamId)  : '—';
+        const a2 = g.a2 ? getPlayerNameFromTeam(g.a2, g.team, g.teamId)  :  '—';
         const teamCell = renderTeamCell(g.team, g.teamLogo, g.teamId);
         const strength = g.strength ? ('<span class="pill">' + g.strength + '</span>') : '';
         const notes = g.notes || '';
-        return `<tr><td>${g.time || ''}</td><td>${teamCell}</td><td>${scorer}</td><td>${g.jersey || ''}</td><td>${a1}</td><td>${a2}</td><td>${strength}</td><td>${notes || ''}</td></tr>`;
+        return `<tr><td>${g.time || ''}</td><td>${teamCell}</td><td>${scorer}</td><td>${a1}</td><td>${a2}</td><td>${strength}</td><td>${notes || ''}</td></tr>`;
       });
       return `
         <table>
           <thead>
-            <tr><th>Time</th><th>Team</th><th>Scorer</th><th>#</th><th>Assist 1</th><th>Assist 2</th><th>Str</th><th>Notes</th></tr>
+            <tr><th>Time</th><th>Team</th><th>Scorer</th><th>Assist 1</th><th>Assist 2</th><th>Str</th><th>Notes</th></tr>
           </thead>
           <tbody>
             ${rows.join('')}
@@ -1275,12 +1271,12 @@
       const rows = arr.map(p => {
         const who = getPlayerNameFromTeam(p.jersey, p.team, p.teamId) || (p.committedTitle || ('#' + (p.jersey || '?')));
         const teamCell = renderTeamCell(p.team, p.teamLogo, p.teamId);
-        return `<tr><td>${p.time || ''}</td><td>${teamCell}</td><td>${who}</td><td>${p.jersey || ''}</td><td>${p.minutes || ''}</td><td>${p.infraction || ''}</td></tr>`;
+        return `<tr><td>${p.time || ''}</td><td>${teamCell}</td><td>${who}</td><td>${p.minutes || ''}</td><td>${p.infraction || ''}</td></tr>`;
       });
       return `
         <table>
           <thead>
-            <tr><th>Time</th><th>Team</th><th>Player</th><th>#</th><th>Min</th><th>Infraction</th></tr>
+            <tr><th>Time</th><th>Team</th><th>Player</th><th>Min</th><th>Infraction</th></tr>
           </thead>
           <tbody>
             ${rows.join('')}
